@@ -1,9 +1,12 @@
-﻿using SolRC.Rostering.Domain.Common;
+﻿using SolRC.Rostering.Domain.Common.Enums;
 
 namespace SolRC.Rostering.Domain.Models;
 
 public record Table(string TableName,
                     string TableCode,
-                    Game TableGame,
+                    GameEnum TableGame,
                     string Location,
-                    IEnumerable<Times> OperatingTimes);
+                    GameProficiency RequiredProficiency,
+                    List<Times> OperatingShift,
+                    List<TableAssignment> StaffAssignment
+                    );

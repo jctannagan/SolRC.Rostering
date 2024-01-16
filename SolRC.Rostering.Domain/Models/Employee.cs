@@ -1,3 +1,5 @@
-﻿namespace SolRC.Rostering.Domain.Models;
+﻿using SolRC.Rostering.Domain.Common.Enums;
 
-public record Employee();
+namespace SolRC.Rostering.Domain.Models;
+
+public record Employee(string FirstName, string LastName, List<Skill> Skill, RoleEnum Role);

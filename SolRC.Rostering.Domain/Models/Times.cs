@@ -1,5 +1,5 @@
-﻿using SolRC.Rostering.Domain.Common;
+﻿using SolRC.Rostering.Domain.Common.Enums;
 
 namespace SolRC.Rostering.Domain.Models;
 
-public record Times(Shift ShiftClass, DateTime StartTime, DateTime EndTime, int Demand);
+public record Times(ShiftEnum ShiftClass, DateTime StartTime, DateTime EndTime, int Demand);
