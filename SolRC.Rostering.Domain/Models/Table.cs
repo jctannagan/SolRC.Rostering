@@ -2,11 +2,11 @@
 
 namespace SolRC.Rostering.Domain.Models;
 
-public record Table(string TableName,
+public record Table(int Id,
+                    string TableName,
                     string TableCode,
                     GameEnum TableGame,
                     string Location,
                     GameProficiency RequiredProficiency,
-                    List<Times> OperatingShift,
-                    List<TableAssignment> StaffAssignment
+                    List<Times> OperatingShift
                     );
