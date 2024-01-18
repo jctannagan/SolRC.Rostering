@@ -9,8 +9,7 @@ public record Table
     public string Code { get; init; }
     public GameEnum Game { get; init; }
     public string Location { get; init; }
-    // public GameProficiency RequiredProficiency { get; init; }
-    public int Min { get; init; }
-    public int Max { get; init; }
-    public List<Times> OperatingShift { get; init; }
+    public int MinRequiredProficiency { get; init; }
+    public int MaxRequiredProficiency { get; init; }
+    public List<Times> OperatingShifts { get; init; }
 }

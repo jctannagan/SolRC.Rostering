@@ -7,5 +7,6 @@ public record TableAssignment
     public DateTime Schedule { get; init; }
     public Table Table { get; init; }
     public Employee Employee { get; init; }
+    public bool IsPublished { get; init; }
     public DateTime PublishedDate { get; init; }
 }
