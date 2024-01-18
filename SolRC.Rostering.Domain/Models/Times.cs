@@ -2,4 +2,11 @@
 
 namespace SolRC.Rostering.Domain.Models;
 
-public record Times(int Id, ShiftEnum ShiftClass, DateTime StartTime, DateTime EndTime, int Demand);
+public record Times
+{
+    public Guid Id { get; init; }
+    public ShiftEnum ShiftClass { get; init; }
+    public DateTime Open { get; init; }
+    public DateTime Close{ get; init; }
+    public int Demand{ get; init; }
+}

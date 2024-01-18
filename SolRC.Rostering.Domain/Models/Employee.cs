@@ -2,4 +2,15 @@
 
 namespace SolRC.Rostering.Domain.Models;
 
-public record Employee(int Id, int Code, string FirstName, string LastName, Shift Shift, List<Skill> Skill, RoleEnum Role);
+public record Employee
+{
+    public Guid Id { get; init; }
+    public string Code { get; init; }
+    public string FirstName { get; init; }
+    public string LastName { get; init; }
+    // public Shift Shift { get; init; }
+    public DateTime ShiftStart { get; init; }
+    public DateTime ShiftEnd { get; init; }
+    public List<Skill> Skills { get; init; }
+    public RoleEnum Role { get; set; }
+}

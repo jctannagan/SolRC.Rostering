@@ -1,8 +1,11 @@
 ﻿namespace SolRC.Rostering.Domain.Models;
 
-public record TableAssignment(int Id,
-                              int BatchId,
-                              DateTime Schedule,
-                              Table Table,
-                              Employee Employee,
-                              DateTime PublishedDate);
+public record TableAssignment
+{
+    public Guid Id { get; init; }
+    public int BatchId { get; init; }
+    public DateTime Schedule { get; init; }
+    public Table Table { get; init; }
+    public Employee Employee { get; init; }
+    public DateTime PublishedDate { get; init; }
+}
