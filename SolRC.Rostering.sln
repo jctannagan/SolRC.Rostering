@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Console", "SolRC.Rostering.Console\SolRC.Rostering.Console.csproj", "{6810C181-77EC-4930-9DDC-D2D0E8BD2032}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Console", "Core\SolRC.Rostering.Console\SolRC.Rostering.Console.csproj", "{6810C181-77EC-4930-9DDC-D2D0E8BD2032}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Domain", "SolRC.Rostering.Domain\SolRC.Rostering.Domain.csproj", "{E3982BFF-DD60-4C08-B036-460C3802C525}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Domain", "Core\SolRC.Rostering.Domain\SolRC.Rostering.Domain.csproj", "{E3982BFF-DD60-4C08-B036-460C3802C525}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Infrastructure", "SolRC.Rostering.Infrastructure\SolRC.Rostering.Infrastructure.csproj", "{67C58E7D-AC1C-4465-9329-21753C891055}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Infrastructure", "Core\SolRC.Rostering.Infrastructure\SolRC.Rostering.Infrastructure.csproj", "{67C58E7D-AC1C-4465-9329-21753C891055}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,9 @@ Global
 		{67C58E7D-AC1C-4465-9329-21753C891055}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67C58E7D-AC1C-4465-9329-21753C891055}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67C58E7D-AC1C-4465-9329-21753C891055}.Release|Any CPU.Build.0 = Release|Any CPU
+		{015B1131-E6F3-43A2-886C-51B80CDB363F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{015B1131-E6F3-43A2-886C-51B80CDB363F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{015B1131-E6F3-43A2-886C-51B80CDB363F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{015B1131-E6F3-43A2-886C-51B80CDB363F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
