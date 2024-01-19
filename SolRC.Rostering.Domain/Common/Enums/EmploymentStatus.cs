@@ -1,8 +1,6 @@
 ﻿namespace SolRC.Rostering.Domain.Common.Enums;
 
-public enum ShiftEnum
+public enum EmploymentStatus
 {
-    Day,
-    Swing,
-    Grave
+    Active, Inactive
 }
