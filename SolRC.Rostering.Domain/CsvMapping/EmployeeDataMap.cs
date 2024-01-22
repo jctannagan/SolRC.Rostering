@@ -12,5 +12,7 @@ public class EmployeeDataMap : ClassMap<Employee>
         Map(m => m.LastName).Name("Last Name");
         Map(m => m.Email).Name("Email address");
         Map(m => m.Status).Name("Employee Status");
+        Map(m => m.ShiftStart).Name("Shift Start");
+        Map(m => m.ShiftEnd).Name("Shift End");
     }
 }

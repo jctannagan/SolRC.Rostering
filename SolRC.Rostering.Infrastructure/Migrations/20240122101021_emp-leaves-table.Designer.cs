@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SolRC.Rostering.Infrastructure.Data;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     [DbContext(typeof(RosteringDbContext))]
-    partial class RosteringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240122101021_emp-leaves-table")]
+    partial class empleavestable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +46,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("Number")
+                        .HasMaxLength(50)
                         .HasColumnType("int");
 
                     b.Property<int>("Role")
@@ -74,17 +78,12 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("EmployeeNumber")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
-
-                    b.HasIndex("EmployeeNumber");
 
                     b.ToTable("Leaves");
                 });
@@ -95,7 +94,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EmployeeId")
+                    b.Property<Guid?>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Game")
@@ -221,24 +220,13 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("SolRC.Rostering.Domain.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeNumber")
-                        .HasPrincipalKey("Number")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
                 {
                     b.HasOne("SolRC.Rostering.Domain.Models.Employee", null)
                         .WithMany("Skills")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EmployeeId");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.TableAssignment", b =>

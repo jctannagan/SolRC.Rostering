@@ -18,4 +18,5 @@ public record Employee
     public DateTime ShiftEnd { get; init; }
     public List<Skill> Skills { get; init; }
     public RoleEnum Role { get; set; }
+    public List<Leaves> Leaves { get; set; }
 }

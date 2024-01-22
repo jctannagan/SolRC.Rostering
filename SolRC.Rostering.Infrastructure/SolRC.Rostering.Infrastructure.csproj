@@ -17,11 +17,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SolRC.Rostering.Domain\SolRC.Rostering.Domain.csproj" />
-      <ProjectReference Include="..\SolRC.Rostering.Web\SolRC.Rostering.Web.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Repository\" />
     </ItemGroup>
 
 </Project>
