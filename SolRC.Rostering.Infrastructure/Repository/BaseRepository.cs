@@ -1,12 +1,15 @@
 ﻿using SolRC.Rostering.Domain.Repository;
+using SolRC.Rostering.Infrastructure.Data;
 
 namespace SolRC.Rostering.Infrastructure;
 
 public class BaseRepository<T> : IBaseRepository<T> where T : class
 {
-    public BaseRepository()
+    private readonly RosteringDbContext _dbContext;
+    
+    public BaseRepository(RosteringDbContext dbContext)
     {
-        
+        _dbContext = dbContext;
     }
     
     public Task<T> GetByIdAsync(Guid id)

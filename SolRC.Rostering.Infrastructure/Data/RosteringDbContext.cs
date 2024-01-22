@@ -11,12 +11,12 @@ public class RosteringDbContext : DbContext
     public DbSet<TableAssignment> TableAssignments { get; set; }
     public DbSet<Times> Times { get; set; }
     public DbSet<Skill> Skills { get; set; }
+    public DbSet<Leaves> Leaves { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public RosteringDbContext(DbContextOptions options) : base(options)
     {
-        optionsBuilder.UseSqlServer(@"Server=LEGION-WS-JEFF;Database=RosteringDBv1;TrustServerCertificate=True;Trusted_Connection=True;Integrated Security=True;");
+        
     }
- 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
