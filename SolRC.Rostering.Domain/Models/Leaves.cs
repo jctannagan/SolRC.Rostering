@@ -1,6 +1,8 @@
-﻿namespace SolRC.Rostering.Domain.Models;
+﻿using SolRC.Rostering.Domain.Common;
 
-public class Leaves
+namespace SolRC.Rostering.Domain.Models;
+
+public class Leaves : BaseAuditableEntity
 {
     public Leaves()
     {

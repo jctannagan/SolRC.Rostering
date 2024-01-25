@@ -1,6 +1,6 @@
 ﻿namespace SolRC.Rostering.Domain.Common;
 
-public abstract class BaseEntities
+public abstract class BaseEntity
 {
     public Guid Id { get; set; }
     private readonly List<BaseEvent> _domainEvents = new();

@@ -1,6 +1,8 @@
-﻿namespace SolRC.Rostering.Domain.Common;
+﻿using MediatR;
 
-public abstract class BaseEvent //: INotification  -- Mediatr
+namespace SolRC.Rostering.Domain.Common;
+
+public abstract class BaseEvent : INotification
 {
     
 }

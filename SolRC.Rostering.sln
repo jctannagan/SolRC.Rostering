@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRC.Rostering.Web", "SolRC.Rostering.Web\SolRC.Rostering.Web.csproj", "{D7B9C46C-356E-422E-AEE3-CFC4518F24A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolRc.Rostering.Application", "SolRc.Rostering.Application\SolRc.Rostering.Application.csproj", "{DF34F9EE-8D13-4FF2-BB48-C967C3186BA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,5 +31,9 @@ Global
 		{D7B9C46C-356E-422E-AEE3-CFC4518F24A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7B9C46C-356E-422E-AEE3-CFC4518F24A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7B9C46C-356E-422E-AEE3-CFC4518F24A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF34F9EE-8D13-4FF2-BB48-C967C3186BA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF34F9EE-8D13-4FF2-BB48-C967C3186BA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF34F9EE-8D13-4FF2-BB48-C967C3186BA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF34F9EE-8D13-4FF2-BB48-C967C3186BA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

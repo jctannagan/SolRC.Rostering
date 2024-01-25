@@ -1,8 +1,10 @@
-﻿using SolRC.Rostering.Domain.Common.Enums;
+﻿using SolRC.Rostering.Domain.Common;
+using SolRC.Rostering.Domain.Common.Enums;
+using SolRC.Rostering.Domain.Events;
 
 namespace SolRC.Rostering.Domain.Models;
 
-public record Employee
+public class Employee : BaseAuditableEntity
 {
     public Employee()
     {
@@ -19,4 +21,18 @@ public record Employee
     public List<Skill> Skills { get; init; }
     public RoleEnum Role { get; set; }
     public List<Leaves> Leaves { get; set; }
+
+    private bool _done;
+
+    public bool Done
+    {
+        get => _done;
+        set
+        {
+            if (value && !_done)
+            {
+                AddDomainEvent(new EmployeeCompletedEvent(this));
+            }
+        }
+    }
 }
