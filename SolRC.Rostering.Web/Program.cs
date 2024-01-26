@@ -17,6 +17,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<RosteringDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<ITableService, TableService>();
+builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
@@ -31,18 +33,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/test", (IEmployeeService employeeService) =>
+app.MapGet("/test", (IEmployeeService employeeService, ITableService tableService) =>
 {
-    var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
-    var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
-        
-    employees.ForEach(x =>
-    {
-        x.Leaves = new();
-        x.Leaves.AddRange(employeeLeaves.Where(p => p.EmployeeNumber == x.Number).ToList());
-    });
-    
-    employeeService.AddBulk(employees);
+    // var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
+    // var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
+    //     
+    // employees.ForEach(x =>
+    // {
+    //     x.Leaves = new();
+    //     x.Leaves.AddRange(employeeLeaves.Where(p => p.EmployeeNumber == x.Number).ToList());
+    // });
+    //
+    // employeeService.AddBulk(employees);
+
+    var employee = employeeService.GetAll();
+    var table = tableService.GetAll();
     
     return Results.Ok("Good");
 });

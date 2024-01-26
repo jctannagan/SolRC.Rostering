@@ -9,4 +9,5 @@ public interface IEmployeeService
     void AddBulk(List<Employee> employee);
     List<Employee> ReadEmployees(string path);
     List<Leave> ReadEmployeeLeaves(string path);
+    List<Employee> GetAll();
 }
