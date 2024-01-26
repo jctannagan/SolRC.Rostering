@@ -21,6 +21,7 @@ builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 var app = builder.Build();
 
@@ -33,7 +34,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/test", (IEmployeeService employeeService, ITableService tableService) =>
+app.MapGet("/test", (IScheduleService scheduleService) =>
 {
     // var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
     // var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
@@ -46,8 +47,7 @@ app.MapGet("/test", (IEmployeeService employeeService, ITableService tableServic
     //
     // employeeService.AddBulk(employees);
 
-    var employee = employeeService.GetAll();
-    var table = tableService.GetAll();
+    scheduleService.GenerateSchedule();
     
     return Results.Ok("Good");
 });
