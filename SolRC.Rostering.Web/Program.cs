@@ -42,7 +42,7 @@ app.MapGet("/test", (IEmployeeService employeeService) =>
         x.Leaves.AddRange(employeeLeaves.Where(p => p.EmployeeNumber == x.Number).ToList());
     });
     
-    employeeService.Add(employees.First());
+    employeeService.AddBulk(employees);
     
     return Results.Ok("Good");
 });

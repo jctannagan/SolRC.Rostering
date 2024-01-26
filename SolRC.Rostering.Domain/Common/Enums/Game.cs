@@ -2,6 +2,7 @@
 
 public enum GameEnum
 {
+    ColorGame,
     Baccarat,
     Poker,
     Craps,

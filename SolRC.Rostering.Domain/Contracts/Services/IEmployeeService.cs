@@ -6,6 +6,7 @@ namespace SolRC.Rostering.Domain.Contracts.Services;
 public interface IEmployeeService
 {
     void Add(Employee employee);
+    void AddBulk(List<Employee> employee);
     List<Employee> ReadEmployees(string path);
-    List<Leaves> ReadEmployeeLeaves(string path);
+    List<Leave> ReadEmployeeLeaves(string path);
 }
