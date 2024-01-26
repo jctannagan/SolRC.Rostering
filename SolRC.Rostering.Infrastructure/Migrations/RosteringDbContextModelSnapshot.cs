@@ -59,7 +59,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leaves", b =>
@@ -86,7 +86,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("EmployeeNumber");
 
-                    b.ToTable("Leaves");
+                    b.ToTable("Leaves", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
@@ -112,7 +112,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Table", b =>
@@ -150,7 +150,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tables");
+                    b.ToTable("Tables", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.TableAssignment", b =>
@@ -183,7 +183,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("TableAssignments");
+                    b.ToTable("TableAssignments", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Times", b =>
@@ -211,7 +211,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Times");
+                    b.ToTable("Times", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leaves", b =>

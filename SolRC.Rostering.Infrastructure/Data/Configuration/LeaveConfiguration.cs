@@ -4,9 +4,9 @@ using SolRC.Rostering.Domain.Models;
 
 namespace SolRC.Rostering.Infrastructure.Data.Configuration;
 
-public class LeavesConfiguration : IEntityTypeConfiguration<Leaves>
+public class LeaveConfiguration : IEntityTypeConfiguration<Leave>
 {
-    public void Configure(EntityTypeBuilder<Leaves> builder)
+    public void Configure(EntityTypeBuilder<Leave> builder)
     {
         builder.HasOne(l => l.Employee)
             .WithMany().OnDelete(DeleteBehavior.NoAction)

@@ -19,4 +19,8 @@
       <ProjectReference Include="..\SolRC.Rostering.Domain\SolRC.Rostering.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\Seed\" />
+    </ItemGroup>
+
 </Project>

@@ -11,8 +11,6 @@ public class EmployeeRepository : IEmployeeRepository
     {
         _dbContext = dbContext;
     }
-
-
     public void Add(Employee employee)
     {
         _dbContext.Add(employee);

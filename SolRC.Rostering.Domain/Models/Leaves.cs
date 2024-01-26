@@ -1,8 +1,8 @@
 ﻿namespace SolRC.Rostering.Domain.Models;
 
-public class Leaves
+public class Leave
 {
-    public Leaves()
+    public Leave()
     {
         Id = Guid.NewGuid();
     }

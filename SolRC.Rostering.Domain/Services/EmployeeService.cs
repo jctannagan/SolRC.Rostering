@@ -22,6 +22,14 @@ public class EmployeeService : IEmployeeService
         _employeeRepository.Add(employee);
     }
     
+    public void AddBulk(List<Employee> employees)
+    {
+        foreach (var employee in employees)
+        {
+            _employeeRepository.Add(employee);
+        }
+    }
+    
     public List<Employee> ReadEmployees(string csvPath)
     {
         List<Employee> employees = new();
@@ -36,9 +44,9 @@ public class EmployeeService : IEmployeeService
         return employees;
     }
 
-    public List<Leaves> ReadEmployeeLeaves(string csvPath)
+    public List<Leave> ReadEmployeeLeaves(string csvPath)
     {
-        List<Leaves> employeeLeaves = new();
+        List<Leave> employeeLeaves = new();
         
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -61,7 +69,7 @@ public class EmployeeService : IEmployeeService
                 {
                     DateTime date = DateTime.ParseExact(headers[i], "M/d/yyyy", CultureInfo.InvariantCulture);
                     bool isAvailable = csv.GetField<bool>(headers[i]);
-                    employeeLeaves.Add(new Leaves { EmployeeNumber = employeeId, Date = date, IsAvailable = isAvailable });
+                    employeeLeaves.Add(new Leave { EmployeeNumber = employeeId, Date = date, IsAvailable = isAvailable });
                 }
             }
         }
