@@ -11,5 +11,5 @@ public record Table
     public string Location { get; init; }
     public int MinRequiredProficiency { get; init; }
     public int MaxRequiredProficiency { get; init; }
-    public List<Times> OperatingShifts { get; init; }
+    public List<Time> OperatingShifts { get; init; }
 }

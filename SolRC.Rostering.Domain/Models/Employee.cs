@@ -16,7 +16,7 @@ public record Employee
     public EmploymentStatus Status { get; init; }
     public DateTime ShiftStart { get; init; }
     public DateTime ShiftEnd { get; init; }
-    public List<Skill> Skills { get; init; }
+    public List<Skill> Skills { get; set; }
     public RoleEnum Role { get; set; }
     public List<Leave> Leaves { get; set; }
 }
