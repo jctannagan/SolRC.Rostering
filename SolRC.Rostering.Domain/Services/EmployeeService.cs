@@ -76,4 +76,9 @@ public class EmployeeService : IEmployeeService
 
         return employeeLeaves;
     }
+
+    public List<Employee> GetAll()
+    {
+        return _employeeRepository.GetAll();
+    }
 }

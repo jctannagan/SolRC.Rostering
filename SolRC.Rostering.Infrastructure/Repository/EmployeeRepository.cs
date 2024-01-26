@@ -1,4 +1,5 @@
-﻿using SolRC.Rostering.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using SolRC.Rostering.Domain.Models;
 using SolRC.Rostering.Domain.Repository;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -15,5 +16,13 @@ public class EmployeeRepository : IEmployeeRepository
     {
         _dbContext.Add(employee);
         _dbContext.SaveChanges();
+    }
+
+    public List<Employee> GetAll()
+    {
+        return _dbContext.Employees
+            .Include(e => e.Leaves)
+            .Include(e => e.Skills)
+            .ToList();
     }
 }

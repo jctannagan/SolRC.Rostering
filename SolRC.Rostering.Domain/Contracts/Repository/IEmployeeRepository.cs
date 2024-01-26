@@ -5,4 +5,5 @@ namespace SolRC.Rostering.Domain.Repository;
 public interface IEmployeeRepository //: IBaseRepository<Employee>
 {
     void Add(Employee employee);
+    List<Employee> GetAll();
 }
