@@ -69,7 +69,7 @@ public class EmployeeService : IEmployeeService
                 {
                     DateTime date = DateTime.ParseExact(headers[i], "M/d/yyyy", CultureInfo.InvariantCulture);
                     bool isAvailable = csv.GetField<bool>(headers[i]);
-                    employeeLeaves.Add(new Leave { EmployeeNumber = employeeId, Date = date, IsAvailable = isAvailable });
+                    employeeLeaves.Add(new Leave { EmployeeNumber = employeeId, Date = date});
                 }
             }
         }
