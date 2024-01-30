@@ -7,13 +7,16 @@ public class ScheduleService : IScheduleService
 {
     private readonly IEmployeeService _employeeService;
     private readonly ITableService _tableService;
+    private readonly ITableAssignmentService _tableAssignmentService;
 
     public ScheduleService(
         IEmployeeService employeeService,
-        ITableService tableService)
+        ITableService tableService,
+        ITableAssignmentService tableAssignmentService)
     {
         _employeeService = employeeService;
         _tableService = tableService;
+        _tableAssignmentService = tableAssignmentService;
     }
 
     private readonly Random _rng = new Random();
@@ -30,32 +33,53 @@ public class ScheduleService : IScheduleService
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
         List<TableAssignment> masterAssignments = new();
-        for (int i = 0; i < totalDays; i++)
+        foreach (var table in tables)
         {
+            //Filter employees that are qualified to deal
+            var qualifiedDealers = employees
+                        .Where(e => e.Skills
+                            .Any(c => c.Game == table.Game
+                                && c.Proficiency >= table.MinRequiredProficiency));
+
+            // if no dealers meet current qualification
+            // ask them to adjust table required proficiency
+
             TableAssignment assignment = new();
-            assignment.ScheduleDate = startDate.AddDays(i);
-
-            var availableEmployees = employees.Where(e => e.Leaves == null ||
-                                                          !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
-                .ToList();
-
-            foreach (var table in tables)
+            var prevAssignment = new List<TableAssignment>();
+            for (int day = 0; day < totalDays; day++)
             {
-                //Filter employees that are qualified to deal
-                var qualifiedDealers = availableEmployees
-                    .Where(e => e.Skills
-                        .Any(c => c.Game == table.Game && c.Proficiency >= table.MinRequiredProficiency));
+
+                var availableEmployees = qualifiedDealers
+                        .Where(e => e.Leaves == null
+                            || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
+                        .ToList();
+
+                // if no qualified dealers are available
+                // WHY THEY ALL ON LEAVE THOUGH?!
+
+                assignment.ScheduleDate = startDate.AddDays(day);
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
                     //given an operating hour (9-6)
                     //open hour should be within/equals to qualified dealer's shift
+                    var shiftMatchedDealers = availableEmployees
+                            .Where(q => q.ShiftStart == operatingShift.Open
+                                        && q.ShiftEnd == operatingShift.Close)
+                            .Select(s => s)
+                            .ToList();
 
-                    var shiftMatchedDealers = qualifiedDealers
-                        .Where(q => q.ShiftStart == operatingShift.Open
-                                    && q.ShiftEnd == operatingShift.Close)
-                        .Select(s => s)
-                        .ToList();
+                    if (masterAssignments.Count == 0)
+                    {
+                        prevAssignment = _tableAssignmentService.Get(startDate.AddDays(day - 1)).ToList();
+                    }
+                    else
+                    {
+                        prevAssignment = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)).ToList();
+                    }
+
+                    var prevAssignmentShift = prevAssignment.Where(p => p.Hours == operatingShift).FirstOrDefault();
+                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Employee.Id).ToList();
 
                     if (shiftMatchedDealers.Count != 0)
                     {
@@ -63,12 +87,9 @@ public class ScheduleService : IScheduleService
                             shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
-
                         masterAssignments.Add(assignment);
                     }
                 }
-
-                // get last employee assigned to the table
             }
 
             // if unable to assign, ask user to adjust required skills ??

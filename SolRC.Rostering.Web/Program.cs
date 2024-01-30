@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SolRC.Rostering.Domain.Contracts.Repository;
 using SolRC.Rostering.Domain.Contracts.Services;
 using SolRC.Rostering.Domain.Repository;
 using SolRC.Rostering.Domain.Services;
 using SolRC.Rostering.Infrastructure;
 using SolRC.Rostering.Infrastructure.Data;
+using SolRC.Rostering.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,9 @@ builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<ITableAssignmentService, TableAssignmentService>();
+builder.Services.AddScoped<ITableAssignmentRepository, TableAssignmentRepository>();
+builder.Services.AddScoped<IExcelFileService,ExcelFileService>();
 
 var app = builder.Build();
 
@@ -34,7 +37,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/test", (IScheduleService scheduleService) =>
+app.MapGet("/test", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
 {
     // var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
     // var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
@@ -47,8 +50,8 @@ app.MapGet("/test", (IScheduleService scheduleService) =>
     //
     // employeeService.AddBulk(employees);
 
-    scheduleService.GenerateSchedule();
-    
+    var tableAssignments = scheduleService.GenerateSchedule();
+    excelFileService.ListToExcel(tableAssignments);
     return Results.Ok("Good");
 });
 
