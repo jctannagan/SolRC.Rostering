@@ -44,10 +44,11 @@ public class ScheduleService : IScheduleService
             // if no dealers meet current qualification
             // ask them to adjust table required proficiency
 
-            TableAssignment assignment = new();
             var prevAssignment = new List<TableAssignment>();
             for (int day = 0; day < totalDays; day++)
             {
+                TableAssignment assignment = new();
+                assignment.ScheduleDate = startDate.AddDays(day);
 
                 var availableEmployees = qualifiedDealers
                         .Where(e => e.Leaves == null
@@ -56,8 +57,6 @@ public class ScheduleService : IScheduleService
 
                 // if no qualified dealers are available
                 // WHY THEY ALL ON LEAVE THOUGH?!
-
-                assignment.ScheduleDate = startDate.AddDays(day);
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
