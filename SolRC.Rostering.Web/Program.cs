@@ -50,8 +50,9 @@ app.MapGet("/test", (IScheduleService scheduleService, IExcelFileService excelFi
     //
     // employeeService.AddBulk(employees);
 
-    var tableAssignments = scheduleService.GenerateSchedule();
+    var tableAssignments = scheduleService.GenerateScheduleV2();
     excelFileService.ListToExcel(tableAssignments);
+    excelFileService.ListToExcelTable(tableAssignments);
     return Results.Ok("Good");
 });
 
