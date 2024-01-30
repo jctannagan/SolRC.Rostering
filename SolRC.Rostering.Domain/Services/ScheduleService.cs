@@ -45,21 +45,23 @@ public class ScheduleService : IScheduleService
             // ask them to adjust table required proficiency
 
             var prevAssignment = new List<TableAssignment>();
-            for (int day = 0; day < totalDays; day++)
+            for (int day = 0; day <= totalDays; day++)
             {
-                TableAssignment assignment = new();
-                assignment.ScheduleDate = startDate.AddDays(day);
-
-                var availableEmployees = qualifiedDealers
-                        .Where(e => e.Leaves == null
-                            || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
-                        .ToList();
 
                 // if no qualified dealers are available
                 // WHY THEY ALL ON LEAVE THOUGH?!
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
+                    TableAssignment assignment = new();
+
+                    assignment.ScheduleDate = startDate.AddDays(day);
+
+                    var availableEmployees = qualifiedDealers
+                            .Where(e => e.Leaves == null
+                                || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
+                            .ToList();
+
                     //given an operating hour (9-6)
                     //open hour should be within/equals to qualified dealer's shift
                     var shiftMatchedDealers = availableEmployees
@@ -74,7 +76,8 @@ public class ScheduleService : IScheduleService
                     }
                     else
                     {
-                        prevAssignment = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)).ToList();
+                        prevAssignment = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
+                            && a.Hours.ShiftClass == operatingShift.ShiftClass).ToList();
                     }
 
                     var prevAssignmentShift = prevAssignment.Where(p => p.Hours == operatingShift).FirstOrDefault();
