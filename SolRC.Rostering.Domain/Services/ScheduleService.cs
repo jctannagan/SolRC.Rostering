@@ -85,8 +85,8 @@ public class ScheduleService : IScheduleService
 
                     if (shiftMatchedDealers.Count != 0)
                     {
-                        assignment.Employee =
-                            shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
+                        var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
+                        assignment.Employee = theChosenOne;
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
                         masterAssignments.Add(assignment);
