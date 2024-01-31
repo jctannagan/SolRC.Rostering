@@ -150,8 +150,7 @@ public class ScheduleService : IScheduleService
                     if (masterAssignments.Count() != 0)
                     {
                         var exclude = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
-                                                     && a.Hours.ShiftClass ==
-                                                     operatingShift.ShiftClass)
+                                                     && a.Table.Name == operatingShift.Table.Name)
                                                     .Select(p => p.Employee.Id)
                                                     .Distinct()
                                                     .ToArray();
