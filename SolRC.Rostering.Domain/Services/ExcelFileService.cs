@@ -50,16 +50,24 @@ public class ExcelFileService : IExcelFileService
                 // date will be the headers
                 worksheet.Cells[1, x + 2].Value = distinctDates[x].ToShortDateString();
 
-                var dateFilteredTableAssignments = tableAssignments
-                    .Where(t => t.ScheduleDate == distinctDates[x]).ToList();
-
-                for (int y = 0; y < dateFilteredTableAssignments.Count; y++)
+                var distinctEmployees = tableAssignments
+                    .Select(t => (
+                        t.Employee.Id,
+                        $"{t.Employee.FirstName} {t.Employee.LastName}"))
+                    .Distinct().OrderBy(e => e).ToList();
+                for (int y = 0; y < distinctEmployees.Count; y++)
                 {
-                    var employeeName = $"{dateFilteredTableAssignments[y].Employee.FirstName} {dateFilteredTableAssignments[y].Employee.LastName}";
-                    worksheet.Cells[y + 2, 1].Value = employeeName;
+                    worksheet.Cells[y + 2, 1].Value = distinctEmployees[y].Item2;
 
-                    var tableShift = $"{dateFilteredTableAssignments[y].Table.Name} {dateFilteredTableAssignments[y].Hours.ShiftClass}";
-                    worksheet.Cells[y + 2, x + 2].Value = tableShift;
+                    var employeeAssignment = tableAssignments
+                        .Where(t => t.ScheduleDate == distinctDates[x]
+                            && t.Employee.Id == distinctEmployees[y].Id).ToList();
+
+                    if (employeeAssignment.Count > 0)
+                    {
+                        var tableShift = $"{employeeAssignment[0].Table.Name} {employeeAssignment[0].Hours.ShiftClass}";
+                        worksheet.Cells[y + 2, x + 2].Value = tableShift;
+                    }
                 }
             }
 
