@@ -6,7 +6,7 @@ namespace SolRC.Rostering.Domain.Services;
 
 public class ExcelFileService : IExcelFileService
 {
-    public void ListToExcelTable(List<TableAssignment> tableAssignments)
+    public string ListToExcelTable(List<TableAssignment> tableAssignments)
     {
         using (var package = new ExcelPackage())
         {
@@ -33,11 +33,11 @@ public class ExcelFileService : IExcelFileService
 
             package.SaveAs(fileInfo);
 
-            Console.WriteLine($"File saved to {fileInfo.FullName}");
+            return fileInfo.FullName;
         }
     }
 
-    public void ListToExcel(List<TableAssignment> tableAssignments)
+    public string ListToExcel(List<TableAssignment> tableAssignments)
     {
         using (var package = new ExcelPackage())
         {
@@ -76,7 +76,7 @@ public class ExcelFileService : IExcelFileService
 
             package.SaveAs(fileInfo);
 
-            Console.WriteLine($"File saved to {fileInfo.FullName}");
+            return fileInfo.FullName;
         }
     }
 }
