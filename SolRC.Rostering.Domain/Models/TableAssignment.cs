@@ -2,11 +2,16 @@
 
 public record TableAssignment
 {
-    public Guid Id { get; init; }
-    public int BatchId { get; init; }
-    public DateTime Schedule { get; init; }
-    public Table Table { get; init; }
-    public Employee Employee { get; init; }
-    public bool IsPublished { get; init; }
-    public DateTime PublishedDate { get; init; }
+    public TableAssignment()
+    {
+        Id = Guid.NewGuid();
+    }
+    public Guid Id { get; set; }
+    public int BatchId { get; set; }
+    public DateTime ScheduleDate { get; set; }
+    public Table Table { get; set; }
+    public Time Hours { get; set; }
+    public Employee Employee { get; set; }
+    public bool IsPublished { get; set; }
+    public DateTime PublishedDate { get; set; }
 }

@@ -7,3 +7,5 @@ packages
 
 # JetBrains Rider
 *.sln.iml
+/.vs
+/SolRC.Rostering.Infrastructure/Data/DesignTimeDbContextFactory.cs

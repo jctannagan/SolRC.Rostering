@@ -10,7 +10,5 @@ public class Leave
     public Guid Id { get; init; }
     public int EmployeeNumber { get; init; }
     public DateTime Date { get; init; }
-    public bool IsAvailable { get; init; }
-    
     public Employee Employee { get; set; }
 }
