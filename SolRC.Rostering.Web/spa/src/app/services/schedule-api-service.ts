@@ -14,6 +14,6 @@ export class ScheduleApiService {
     // Your logic here
     // console.log('Service method called');
     //return this.http.get('/api/test');
-    return this.http.get('/api/schedule/download');
+    return this.http.get('/api/schedule/download', {responseType: 'blob'});
   }
 }

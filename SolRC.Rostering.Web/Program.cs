@@ -28,6 +28,19 @@ builder.Services.AddScoped<ITableAssignmentService, TableAssignmentService>();
 builder.Services.AddScoped<ITableAssignmentRepository, TableAssignmentRepository>();
 builder.Services.AddScoped<IExcelFileService,ExcelFileService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+
+            //you can configure your custom policy
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -37,10 +50,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 
-app.MapGet("/api/test", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
-{
+// app.MapGet("/api/test", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
+// {
     // var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
     // var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
     //     
@@ -52,11 +67,11 @@ app.MapGet("/api/test", (IScheduleService scheduleService, IExcelFileService exc
     //
     // employeeService.AddBulk(employees);
 
-    var tableAssignments = scheduleService.GenerateScheduleV2();
-    excelFileService.ListToExcel(tableAssignments);
-    excelFileService.ListToExcelTable(tableAssignments);
-    return Results.Ok("Good");
-});
+//     var tableAssignments = scheduleService.GenerateScheduleV2();
+//     excelFileService.ListToExcel(tableAssignments);
+//     excelFileService.ListToExcelTable(tableAssignments);
+//     return Results.Ok("Good");
+// });
 
 //app.MapGet("/api/download", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
 //{

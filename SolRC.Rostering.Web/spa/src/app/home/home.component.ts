@@ -17,13 +17,19 @@ export class HomeComponent {
     //  complete: () => console.log("complete"),
     //});
 
-    this.scheduleApiService.generateSchedule().subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.download = 'yourfile.xlsx';
-      anchor.href = url;
-      anchor.click();
-      window.URL.revokeObjectURL(url);
-    });
+    this.scheduleApiService.generateSchedule()
+      .subscribe(resp => this.downloadFile(resp, 'application/ms-excel'));
+  }
+
+  private downloadFile(data: any, type: string) {
+    let blob = new Blob([data], { type: type});
+    let anchor = document.createElement("a");
+    anchor.download = "ScheduledRoster.xlsx";
+    anchor.href = window.URL.createObjectURL(blob);
+    anchor.click();
+    // let pwa = window.open(url);
+    // if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+    //   alert( 'Please disable your Pop-up blocker and try again.');
+    // }
   }
 }

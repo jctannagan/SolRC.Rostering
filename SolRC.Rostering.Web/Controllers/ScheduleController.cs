@@ -33,7 +33,7 @@ namespace SolRC.Rostering.Web.Controllers
                 var fileStream = new FileStream(fileLoc, FileMode.Open, FileAccess.Read);
 
                 // Return the file with a MIME type for .xlsx files
-                return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(fileLoc));
+                return File(fileStream, "application/ms-excel", Path.GetFileName(fileLoc));
             }
 
             return NotFound();
