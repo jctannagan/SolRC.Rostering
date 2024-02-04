@@ -81,4 +81,51 @@ public class EmployeeService : IEmployeeService
     {
         return _employeeRepository.GetAll();
     }
+
+    public List<Employee> ReadEmployeesCsv(Stream fs)
+    {
+        List<Employee> employees = new();
+
+        using (var reader = new StreamReader(fs))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            csv.Context.RegisterClassMap<EmployeeDataMap>();
+            employees = csv.GetRecords<Employee>().ToList();
+        }
+
+        return employees;
+    }
+
+    public List<Leave> ReadEmployeeLeavesCsv(Stream fs)
+    {
+        List<Leave> employeeLeaves = new();
+
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            HasHeaderRecord = true
+        };
+
+        using (var reader = new StreamReader(fs))
+        using (var csv = new CsvReader(reader, config))
+        {
+            csv.Read();
+            csv.ReadHeader();
+            string[] headers = csv.HeaderRecord;
+
+            while (csv.Read())
+            {
+                var record = csv.GetRecord<dynamic>();
+                var employeeId = int.Parse(record.EmployeeId); // Assuming the ID in the CSV is compatible with Guid
+
+                for (int i = 1; i < headers.Length; i++)
+                {
+                    DateTime date = DateTime.ParseExact(headers[i], "M/d/yyyy", CultureInfo.InvariantCulture);
+                    bool isAvailable = csv.GetField<bool>(headers[i]);
+                    employeeLeaves.Add(new Leave { EmployeeNumber = employeeId, Date = date });
+                }
+            }
+        }
+
+        return employeeLeaves;
+    }
 }

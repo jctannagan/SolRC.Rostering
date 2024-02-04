@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SolRC.Rostering.Domain.Contracts.Services;
 
 namespace SolRC.Rostering.Web.Controllers;
 
@@ -6,19 +7,28 @@ namespace SolRC.Rostering.Web.Controllers;
 [ApiController]
 public class EmployeeController : ControllerBase
 {
+    private readonly IEmployeeService _employeeService;
+
+    public EmployeeController(IEmployeeService employeeService)
+    {
+        _employeeService = employeeService;
+    }
+
     public EmployeeController()
     {
         
     }
 
-    [HttpPost("/UploadEmployees")]
-    public IActionResult Upload()
+    [HttpPost("/upload-employee-csv")]
+    public IActionResult Upload([FromForm] IFormFileCollection file)
     {
-        return Ok();
+        _employeeService.ReadEmployeesCsv(file[0].OpenReadStream());
+
+        return Ok("Upload successful");
     }
     
     [HttpPost("/UploadLeaves")]
-    public IActionResult UploadLeaves()
+    public IActionResult UploadLeaves([FromForm] IFormFileCollection file)
     {
         return Ok();
     }
