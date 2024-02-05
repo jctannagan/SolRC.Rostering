@@ -42,22 +42,25 @@ public class ExcelFileService : IExcelFileService
         using (var package = new ExcelPackage())
         {
             var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
+            worksheet.Cells[1, 1].Value = "EmpNumber";
+            worksheet.Cells[1, 2].Value = "Name";
             var distinctDates = tableAssignments.Select(t => t.ScheduleDate)
                 .Distinct().OrderBy(t => t.Date).ToList();
             for (int x = 0; x < distinctDates.Count; x++)
             {
                 // date will be the headers
-                worksheet.Cells[1, x + 2].Value = distinctDates[x].ToShortDateString();
+                worksheet.Cells[1, x + 3].Value = distinctDates[x].ToShortDateString();
 
                 var distinctEmployees = tableAssignments
                     .Select(t => (
                         t.Employee.Id,
+                        t.Employee.Number,
                         $"{t.Employee.FirstName} {t.Employee.LastName}"))
                     .Distinct().OrderBy(e => e).ToList();
                 for (int y = 0; y < distinctEmployees.Count; y++)
                 {
                     worksheet.Cells[y + 2, 1].Value = distinctEmployees[y].Item2;
+                    worksheet.Cells[y + 2, 2].Value = distinctEmployees[y].Item3;
 
                     var employeeAssignment = tableAssignments
                         .Where(t => t.ScheduleDate == distinctDates[x]
@@ -65,8 +68,8 @@ public class ExcelFileService : IExcelFileService
 
                     if (employeeAssignment.Count > 0)
                     {
-                        var tableShift = $"{employeeAssignment[0].Table.Name} {employeeAssignment[0].Hours.ShiftClass}";
-                        worksheet.Cells[y + 2, x + 2].Value = tableShift;
+                        var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}";
+                        worksheet.Cells[y + 2, x + 3].Value = tableShift;
                     }
                 }
             }

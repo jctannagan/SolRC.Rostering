@@ -2,7 +2,7 @@
 
 namespace SolRC.Rostering.Web.Controllers;
 
-[Route("api/{Controller}")]
+[Route("api/[Controller]")]
 [ApiController]
 public class TableGameController : ControllerBase
 {
@@ -11,7 +11,7 @@ public class TableGameController : ControllerBase
         
     }
 
-    [HttpPost("/UploadTableGames")]
+    [HttpPost("upload-table-games")]
     public IActionResult Upload()
     {
         return Ok();

@@ -154,11 +154,11 @@ public class ScheduleService : IScheduleService
                                                     .Select(p => p.Employee.Id)
                                                     .Distinct()
                                                     .ToArray();
-                        availableEmployees = availableEmployees.Where(a => !exclude.Contains(a.Id)).ToList();
+                        qualifiedDealers = qualifiedDealers.Where(a => !exclude.Contains(a.Id)).ToList();
                     }
                     //given an operating hour (9-6)
                     //open hour should be within/equals to qualified dealer's shift
-                    var shiftMatchedDealers = availableEmployees
+                    var shiftMatchedDealers = qualifiedDealers
                         .Where(q => q.ShiftStart == operatingShift.Open
                                     && q.ShiftEnd == operatingShift.Close)
                         .Select(s => s)
