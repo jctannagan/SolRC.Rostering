@@ -37,9 +37,8 @@ public class ScheduleService : IScheduleService
         {
             //Filter employees that are qualified to deal
             var qualifiedDealers = employees
-                .Where(e => e.Skills
-                    .Any(c => c.Game == table.Game
-                              && c.Proficiency >= table.MinRequiredProficiency));
+                .Where(e => e.Skills.Any(c => c.Game == table.Game
+                    && c.Proficiency >= table.MinRequiredProficiency));
 
             // if no dealers meet current qualification
             // ask them to adjust table required proficiency
@@ -58,14 +57,14 @@ public class ScheduleService : IScheduleService
 
                     var availableEmployees = qualifiedDealers
                         .Where(e => e.Leaves == null
-                                    || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
+                            || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
                         .ToList();
 
                     //given an operating hour (9-6)
                     //open hour should be within/equals to qualified dealer's shift
                     var shiftMatchedDealers = availableEmployees
                         .Where(q => q.ShiftStart == operatingShift.Open
-                                    && q.ShiftEnd == operatingShift.Close)
+                            && q.ShiftEnd == operatingShift.Close)
                         .Select(s => s)
                         .ToList();
 
@@ -75,19 +74,18 @@ public class ScheduleService : IScheduleService
                     }
                     else
                     {
-                        prevAssignment = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
-                                                                      && a.Hours.ShiftClass ==
-                                                                      operatingShift.ShiftClass).ToList();
+                        prevAssignment = masterAssignments
+                            .Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
+                                && a.Hours.ShiftClass == operatingShift.ShiftClass)
+                            .ToList();
                     }
 
                     var prevAssignmentShift = prevAssignment.Where(p => p.Hours == operatingShift).FirstOrDefault();
-                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Employee.Id)
-                        .ToList();
+                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Employee.Id).ToList();
 
                     if (shiftMatchedDealers.Count != 0)
                     {
-                        var theChosenOne =
-                            shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
+                        var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
                         assignment.Employee = theChosenOne;
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
@@ -122,9 +120,9 @@ public class ScheduleService : IScheduleService
             {
                 var availableEmployees = employees
                     .Where(e => e.Leaves == null
-                                || !e.Leaves.Any(l => l.Date.Date == currentDate))
+                        || !e.Leaves.Any(l => l.Date.Date == currentDate))
                     .ToList();
-                
+
                 var assignedToday = masterAssignments
                     .Where(s => s.ScheduleDate == currentDate)
                     .AsEnumerable();
@@ -134,40 +132,39 @@ public class ScheduleService : IScheduleService
                     var exclude = assignedToday.Select(p => p.Employee.Id).Distinct().ToArray();
                     availableEmployees = availableEmployees.Where(a => !exclude.Contains(a.Id)).ToList();
                 }
-                
+
                 //Filter employees that are qualified to deal
                 var qualifiedDealers = availableEmployees
-                    .Where(e => e.Skills
-                        .Any(c => c.Game == table.Game
-                                  && c.Proficiency >= table.MinRequiredProficiency));
+                    .Where(e => e.Skills.Any(c => c.Game == table.Game
+                        && c.Proficiency >= table.MinRequiredProficiency));
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
                     TableAssignment assignment = new();
                     assignment.ScheduleDate = currentDate;
-                    
+
                     // This removes the dealer that was assigned to the same table and shift yesterday
                     if (masterAssignments.Count() != 0)
                     {
-                        var exclude = masterAssignments.Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
-                                                     && a.Table.Name == operatingShift.Table.Name)
-                                                    .Select(p => p.Employee.Id)
-                                                    .Distinct()
-                                                    .ToArray();
+                        var exclude = masterAssignments
+                            .Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
+                                && a.Table.Name == operatingShift.Table.Name)
+                            .Select(p => p.Employee.Id)
+                            .Distinct()
+                            .ToArray();
                         qualifiedDealers = qualifiedDealers.Where(a => !exclude.Contains(a.Id)).ToList();
                     }
                     //given an operating hour (9-6)
                     //open hour should be within/equals to qualified dealer's shift
                     var shiftMatchedDealers = qualifiedDealers
                         .Where(q => q.ShiftStart == operatingShift.Open
-                                    && q.ShiftEnd == operatingShift.Close)
+                            && q.ShiftEnd == operatingShift.Close)
                         .Select(s => s)
                         .ToList();
 
                     if (shiftMatchedDealers.Count != 0)
                     {
-                        var theChosenOne =
-                            shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
+                        var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
                         assignment.Employee = theChosenOne;
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
