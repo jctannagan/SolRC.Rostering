@@ -6,6 +6,13 @@ namespace SolRC.Rostering.Domain.Services;
 
 public class ExcelFileService : IExcelFileService
 {
+    private readonly IEmployeeService _employeeService;
+
+    public ExcelFileService(IEmployeeService employeeService)
+    {
+        _employeeService = employeeService;
+    }
+
     public string ListToExcelTable(List<TableAssignment> tableAssignments)
     {
         using (var package = new ExcelPackage())
@@ -51,25 +58,34 @@ public class ExcelFileService : IExcelFileService
                 // date will be the headers
                 worksheet.Cells[1, x + 3].Value = distinctDates[x].ToShortDateString();
 
-                var distinctEmployees = tableAssignments
-                    .Select(t => (
-                        t.Employee.Id,
-                        t.Employee.Number,
-                        $"{t.Employee.FirstName} {t.Employee.LastName}"))
-                    .Distinct().OrderBy(e => e).ToList();
-                for (int y = 0; y < distinctEmployees.Count; y++)
+                var allEmployees = _employeeService.GetAll().OrderBy(e => e.Number).ToList();
+
+                for (int y = 0; y < allEmployees.Count; y++)
                 {
-                    worksheet.Cells[y + 2, 1].Value = distinctEmployees[y].Item2;
-                    worksheet.Cells[y + 2, 2].Value = distinctEmployees[y].Item3;
+                    worksheet.Cells[y + 2, 1].Value = allEmployees[y].Number;
 
-                    var employeeAssignment = tableAssignments
-                        .Where(t => t.ScheduleDate == distinctDates[x]
-                            && t.Employee.Id == distinctEmployees[y].Id).ToList();
+                    var fullName = $"{allEmployees[y].FirstName} {allEmployees[y].LastName}";
+                    worksheet.Cells[y + 2, 2].Value = fullName;
 
-                    if (employeeAssignment.Count > 0)
+                    var isOnLeave = allEmployees[y].Leaves.Any(l => l.Date.Date == distinctDates[x].Date);
+                    if (isOnLeave)
                     {
-                        var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}";
-                        worksheet.Cells[y + 2, x + 3].Value = tableShift;
+                        worksheet.Cells[y + 2, x + 3].Value = "On Leave";
+                    }
+                    else
+                    {
+                        var employeeAssignment = tableAssignments
+                            .Where(t => t.ScheduleDate == distinctDates[x]
+                                && t.Employee.Id == allEmployees[y].Id).ToList();
+                        if (employeeAssignment.Count > 0)
+                        {
+                            var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}";
+                            worksheet.Cells[y + 2, x + 3].Value = tableShift;
+                        }
+                        else
+                        {
+                            worksheet.Cells[y + 2, x + 3].Value = "Not Assigned";
+                        }
                     }
                 }
             }
