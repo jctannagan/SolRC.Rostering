@@ -21,7 +21,7 @@ namespace SolRC.Rostering.Web.Controllers
         {
             var tableAssignments = scheduleService.GenerateScheduleV2();
             var fileLoc = this.excelFileService.ListToExcel(tableAssignments);
-            excelFileService.ListToExcelTable(tableAssignments);
+            // excelFileService.ListToExcelTable(tableAssignments);
 
             // Define the path to the file
             // var filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExportedData.xlsx");

@@ -27,8 +27,8 @@ public class ScheduleService : IScheduleService
         List<Table> tables = _tableService.GetAll();
         List<Employee> employees = _employeeService.GetAll();
 
-        var startDate = new DateTime(2024, 01, 01);
-        var endDate = new DateTime(2024, 01, 14);
+        var startDate = new DateTime(2024, 01, 27);
+        var endDate = new DateTime(2024, 02, 04);
         var totalDays = (endDate - startDate).TotalDays;
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
@@ -107,8 +107,8 @@ public class ScheduleService : IScheduleService
         List<Table> tables = _tableService.GetAll();
         List<Employee> employees = _employeeService.GetAll();
 
-        var startDate = new DateTime(2024, 01, 01);
-        var endDate = new DateTime(2024, 01, 14);
+        var startDate = new DateTime(2024, 01, 27);
+        var endDate = new DateTime(2024, 02, 04);
         var totalDays = (endDate - startDate).TotalDays;
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
