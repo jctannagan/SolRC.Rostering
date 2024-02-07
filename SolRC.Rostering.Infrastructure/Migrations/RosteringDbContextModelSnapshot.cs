@@ -22,6 +22,31 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RelieverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PitId");
+
+                    b.HasIndex("RelieverId");
+
+                    b.ToTable("Clusters");
+                });
+
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Employee", b =>
                 {
                     b.Property<Guid>("Id")
@@ -62,6 +87,29 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.ToTable("Employees");
                 });
 
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.GamingFloor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Details")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GamingFloor");
+                });
+
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leave", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,6 +132,26 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.HasIndex("EmployeeNumber");
 
                     b.ToTable("Leaves");
+                });
+
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("GamingFloorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GamingFloorId");
+
+                    b.ToTable("Pits");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
@@ -118,6 +186,9 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ClusterId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -146,6 +217,8 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
 
                     b.ToTable("Tables");
                 });
@@ -216,6 +289,21 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.ToTable("Times");
                 });
 
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
+                {
+                    b.HasOne("SolRC.Rostering.Domain.Models.Pit", null)
+                        .WithMany("Clusters")
+                        .HasForeignKey("PitId");
+
+                    b.HasOne("SolRC.Rostering.Domain.Models.Employee", "Reliever")
+                        .WithMany()
+                        .HasForeignKey("RelieverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reliever");
+                });
+
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leave", b =>
                 {
                     b.HasOne("SolRC.Rostering.Domain.Models.Employee", null)
@@ -234,6 +322,13 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
+                {
+                    b.HasOne("SolRC.Rostering.Domain.Models.GamingFloor", null)
+                        .WithMany("Pits")
+                        .HasForeignKey("GamingFloorId");
+                });
+
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
                 {
                     b.HasOne("SolRC.Rostering.Domain.Models.Employee", "Employee")
@@ -243,6 +338,13 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Table", b =>
+                {
+                    b.HasOne("SolRC.Rostering.Domain.Models.Cluster", null)
+                        .WithMany("TableGames")
+                        .HasForeignKey("ClusterId");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.TableAssignment", b =>
@@ -283,11 +385,26 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.Navigation("Table");
                 });
 
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
+                {
+                    b.Navigation("TableGames");
+                });
+
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Employee", b =>
                 {
                     b.Navigation("Leaves");
 
                     b.Navigation("Skills");
+                });
+
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.GamingFloor", b =>
+                {
+                    b.Navigation("Pits");
+                });
+
+            modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
+                {
+                    b.Navigation("Clusters");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Table", b =>
