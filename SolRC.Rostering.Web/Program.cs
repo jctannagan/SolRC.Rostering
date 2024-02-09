@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers();
+
 builder.Services.AddDbContext<RosteringDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -26,6 +28,19 @@ builder.Services.AddScoped<ITableAssignmentService, TableAssignmentService>();
 builder.Services.AddScoped<ITableAssignmentRepository, TableAssignmentRepository>();
 builder.Services.AddScoped<IExcelFileService,ExcelFileService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+
+            //you can configure your custom policy
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,10 +50,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 
-app.MapGet("/test", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
-{
+// app.MapGet("/api/test", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
+// {
     // var employees = employeeService.ReadEmployees(@"..\Data\ZohoEmployeeList.csv");
     // var employeeLeaves = employeeService.ReadEmployeeLeaves(@"..\Data\EmployeeLeaves.csv");
     //     
@@ -50,10 +67,30 @@ app.MapGet("/test", (IScheduleService scheduleService, IExcelFileService excelFi
     //
     // employeeService.AddBulk(employees);
 
-    var tableAssignments = scheduleService.GenerateScheduleV2();
-    excelFileService.ListToExcel(tableAssignments);
-    excelFileService.ListToExcelTable(tableAssignments);
-    return Results.Ok("Good");
-});
+//     var tableAssignments = scheduleService.GenerateScheduleV2();
+//     excelFileService.ListToExcel(tableAssignments);
+//     excelFileService.ListToExcelTable(tableAssignments);
+//     return Results.Ok("Good");
+// });
+
+//app.MapGet("/api/download", (IScheduleService scheduleService, IExcelFileService excelFileService) =>
+//{
+//    // Define the path to the file
+//    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Files", "example.xlsx");
+
+//    // Check if the file exists
+//    if (!File.Exists(filePath))
+//    {
+//        return Results.NotFound();
+//    }
+
+//    // Read the file into a FileStream
+//    var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+//    // Return the file with a MIME type for .xlsx files
+//    return File(fileStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Path.GetFileName(filePath));
+//});
+
+app.MapControllers();
 
 app.Run();

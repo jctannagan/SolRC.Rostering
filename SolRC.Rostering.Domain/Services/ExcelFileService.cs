@@ -1,12 +1,21 @@
-﻿using SolRC.Rostering.Domain.Models;
+﻿using System.Drawing;
+using SolRC.Rostering.Domain.Models;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SolRC.Rostering.Domain.Contracts.Services;
 
 namespace SolRC.Rostering.Domain.Services;
 
 public class ExcelFileService : IExcelFileService
 {
-    public void ListToExcelTable(List<TableAssignment> tableAssignments)
+    private readonly IEmployeeService _employeeService;
+
+    public ExcelFileService(IEmployeeService employeeService)
+    {
+        _employeeService = employeeService;
+    }
+
+    public string ListToExcelTable(List<TableAssignment> tableAssignments)
     {
         using (var package = new ExcelPackage())
         {
@@ -33,42 +42,109 @@ public class ExcelFileService : IExcelFileService
 
             package.SaveAs(fileInfo);
 
-            Console.WriteLine($"File saved to {fileInfo.FullName}");
+            return fileInfo.FullName;
         }
     }
 
-    public void ListToExcel(List<TableAssignment> tableAssignments)
+    public string ListToExcel(List<TableAssignment> tableAssignments)
     {
         using (var package = new ExcelPackage())
         {
+            var dates = tableAssignments.Select(p => p.ScheduleDate).Distinct();
+            var minDate = dates.Min();
+            var maxDate = dates.Max();
+            
+            Color headerBgColor = ColorTranslator.FromHtml("#FFC000");
+            
             var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+            worksheet.Cells[1, 3, 1, 4].Merge = true;
+            string dateHeader = string.Empty;
+            if (minDate.Month == maxDate.Month)
+                dateHeader = $"{minDate.Day}-{maxDate.Day} {maxDate.ToString("MMMM, yyy")}";
+            else
+                dateHeader = $"{minDate.ToString("d MMM")}-{maxDate.ToString("d MMM, yyy")}";
+            
+            worksheet.Cells[1, 3].Value = dateHeader;
+            worksheet.Cells[1, 3].Style.Font.Bold = true;
+            
+            worksheet.Cells[2, 1].Value = "EmpNumber";
+            worksheet.Cells[2, 1].Style.Font.Bold = true;
+            worksheet.Cells[2, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            worksheet.Cells[2, 1].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+            worksheet.Cells[2, 1].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+            worksheet.Cells[2, 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            worksheet.Cells[2, 1].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            worksheet.Cells[2, 1].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+            
+            worksheet.Cells[2, 2].Value = "Name";
+            worksheet.Cells[2, 2].Style.Font.Bold = true;
+            worksheet.Cells[2, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            worksheet.Cells[2, 2].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+            worksheet.Cells[2, 2].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+            worksheet.Cells[2, 2].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+            worksheet.Cells[2, 2].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+            worksheet.Cells[2, 2].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
             var distinctDates = tableAssignments.Select(t => t.ScheduleDate)
                 .Distinct().OrderBy(t => t.Date).ToList();
+            var column = 3;
+            
             for (int x = 0; x < distinctDates.Count; x++)
             {
                 // date will be the headers
-                worksheet.Cells[1, x + 2].Value = distinctDates[x].ToShortDateString();
+                worksheet.Cells[2, column, 2, column + 1].Merge = true;
+                worksheet.Cells[2, column].Value = distinctDates[x].ToString("ddd d");
+                worksheet.Cells[2, column].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                worksheet.Cells[2, column].Style.Font.Bold = true;
+                worksheet.Cells[2, column].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                worksheet.Cells[2, column].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+                worksheet.Cells[2, column].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                worksheet.Cells[2, column + 1].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                worksheet.Cells[2, column].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[2, column + 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[2, column].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[2, column + 1].Style.Border.Right.Style = ExcelBorderStyle.Thin;
 
-                var distinctEmployees = tableAssignments
-                    .Select(t => (
-                        t.Employee.Id,
-                        $"{t.Employee.FirstName} {t.Employee.LastName}"))
-                    .Distinct().OrderBy(e => e).ToList();
-                for (int y = 0; y < distinctEmployees.Count; y++)
+                var allEmployees = _employeeService.GetAll().OrderBy(e => e.Number).ToList();
+                var row = 3;
+                for (int y = 0; y < allEmployees.Count; y++)
                 {
-                    worksheet.Cells[y + 2, 1].Value = distinctEmployees[y].Item2;
+                    worksheet.Cells[row, 1].Value = allEmployees[y].Number;
 
-                    var employeeAssignment = tableAssignments
-                        .Where(t => t.ScheduleDate == distinctDates[x]
-                            && t.Employee.Id == distinctEmployees[y].Id).ToList();
+                    var fullName = $"{allEmployees[y].FirstName} {allEmployees[y].LastName}";
+                    worksheet.Cells[row, 2].Value = fullName;
+                    worksheet.Cells[row, column, row + 1, column + 1].Merge = true;
+                    worksheet.Cells[row, column].Style.WrapText = true;
+                    worksheet.Cells[row, column].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    worksheet.Cells[row, column].Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
 
-                    if (employeeAssignment.Count > 0)
+                    var isOnLeave = allEmployees[y].Leaves.Any(l => l.Date.Date == distinctDates[x].Date);
+                    if (isOnLeave)
                     {
-                        var tableShift = $"{employeeAssignment[0].Table.Name} {employeeAssignment[0].Hours.ShiftClass}";
-                        worksheet.Cells[y + 2, x + 2].Value = tableShift;
+                        worksheet.Cells[row, column].Value = "On Leave";
+                       // worksheet.Cells[row, column].Value = $"{row}-{column}";
                     }
+                    else
+                    {
+                        var employeeAssignment = tableAssignments
+                            .Where(t => t.ScheduleDate == distinctDates[x]
+                                && t.Employee.Id == allEmployees[y].Id).ToList();
+                        if (employeeAssignment.Count > 0)
+                        {
+                            var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}" +
+                                $"\n{employeeAssignment[0].Table.Location}";
+                            worksheet.Cells[row, column].Value = tableShift;
+                            // worksheet.Cells[row, column].Value = $"{row}-{column}";
+                        }
+                        else
+                        {
+                            worksheet.Cells[row, column].Value = "Not Assigned";
+                            // worksheet.Cells[row, column].Value = $"{row}-{column}";
+                        }
+                    }
+                    row += 2;
                 }
+                column += 2;
             }
 
             var fileName = "ExportedData.xlsx";
@@ -76,7 +152,7 @@ public class ExcelFileService : IExcelFileService
 
             package.SaveAs(fileInfo);
 
-            Console.WriteLine($"File saved to {fileInfo.FullName}");
+            return fileInfo.FullName;
         }
     }
 }
