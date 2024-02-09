@@ -5,4 +5,5 @@ public record Pit
     public Guid Id { get; set; }
     public string Name { get; set; }
     public List<Cluster> Clusters { get; set; }
+    public List<Employee> Supervisor { get; set; }
 }
