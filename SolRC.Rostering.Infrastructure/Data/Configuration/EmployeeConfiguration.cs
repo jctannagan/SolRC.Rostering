@@ -9,7 +9,7 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
     public void Configure(EntityTypeBuilder<Employee> builder)
     {
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Number);
+        builder.Property(e => e.EmployeeNumber);
         builder.Property(e => e.FirstName)
             .IsRequired()
             .HasMaxLength(50);

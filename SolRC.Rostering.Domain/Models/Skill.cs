@@ -5,7 +5,7 @@ namespace SolRC.Rostering.Domain.Models;
 public record Skill
 {
     public Guid Id { get; init; }
-    public GameEnum Game { get; init; }
+    public Lookup Game { get; init; }
     
     private readonly int _proficiencyLevel;
     

@@ -15,6 +15,7 @@ public class RosteringDbContext : DbContext
     public DbSet<GamingFloor> GamingFloor { get; set; }
     public DbSet<Pit> Pits { get; set; }
     public DbSet<Cluster> Clusters { get; set; }
+    public DbSet<Lookup> Lookups { get; set; }
 
     public RosteringDbContext(DbContextOptions options) : base(options)
     {

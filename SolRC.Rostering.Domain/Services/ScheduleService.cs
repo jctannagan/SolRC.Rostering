@@ -38,7 +38,7 @@ public class ScheduleService : IScheduleService
             //Filter employees that are qualified to deal
             var qualifiedDealers = employees
                 .Where(e => e.Skills.Any(c => c.Game == table.Game
-                    && c.Proficiency >= table.MinRequiredProficiency));
+                    && c.Proficiency >= table.RequiredProficiency));
 
             // if no dealers meet current qualification
             // ask them to adjust table required proficiency
@@ -136,7 +136,7 @@ public class ScheduleService : IScheduleService
                 //Filter employees that are qualified to deal
                 var qualifiedDealers = availableEmployees
                     .Where(e => e.Skills.Any(c => c.Game == table.Game
-                        && c.Proficiency >= table.MinRequiredProficiency));
+                        && c.Proficiency >= table.RequiredProficiency));
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {

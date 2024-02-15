@@ -10,7 +10,7 @@ public class LeaveConfiguration : IEntityTypeConfiguration<Leave>
     {
         builder.HasOne(l => l.Employee)
             .WithMany().OnDelete(DeleteBehavior.NoAction)
-            .HasPrincipalKey(l => l.Number)
+            .HasPrincipalKey(l => l.EmployeeNumber)
             .HasForeignKey(l => l.EmployeeNumber);
     }
 }

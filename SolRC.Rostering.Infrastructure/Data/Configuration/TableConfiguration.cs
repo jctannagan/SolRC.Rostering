@@ -17,9 +17,7 @@ public class TableConfiguration : IEntityTypeConfiguration<Table>
             .IsRequired()
             .IsUnicode(false)
             .HasMaxLength(50);
-        builder.Property(e => e.Location)
-            .IsRequired()
-            .IsUnicode(false)
-            .HasMaxLength(50);
+        builder.HasOne(l => l.Game)
+            .WithMany().OnDelete(DeleteBehavior.NoAction);
     }
 }
