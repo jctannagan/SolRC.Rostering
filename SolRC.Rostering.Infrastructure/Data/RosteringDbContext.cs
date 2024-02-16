@@ -12,6 +12,9 @@ public class RosteringDbContext : DbContext
     public DbSet<Time> Times { get; set; }
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Leave> Leaves { get; set; }
+    public DbSet<GamingFloor> GamingFloor { get; set; }
+    public DbSet<Pit> Pits { get; set; }
+    public DbSet<Cluster> Clusters { get; set; }
 
     public RosteringDbContext(DbContextOptions options) : base(options)
     {
