@@ -85,4 +85,11 @@ values
 ('GAME', 'STA', ''),
 ('GAME', 'TRN', ''),
 ('GAME', 'UTH', ''),
-('GAME', 'VIP', '')
+('GAME', 'VIP', ''),
+('GAME', 'PTT', ''),
+('GAME', 'RDB', ''),
+('GAME', 'ONLINE', ''),
+('GAME', 'SSM', ''),
+('GAME', 'BR', ''),
+('GAME', 'SSX', ''),
+('GAME', 'PSM', '')
