@@ -1,0 +1,33 @@
+<div class="main-content">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header card-header-warning">
+        <h4 class="card-title">Manage Schedules</h4>
+        <p class="card-category">Create bi-weekly schedule plans</p>
+      </div>
+      <div class="card-body">
+        <div class="container">
+          <div class="row">
+            <mat-form-field appearance="fill">
+              <mat-label>Enter a date range</mat-label>
+              <mat-date-range-input [rangePicker]="picker">
+                <input matStartDate placeholder="Start date" />
+                <input matEndDate placeholder="End date" />
+              </mat-date-range-input>
+              <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle
+                matSuffix
+                [for]="picker"></mat-datepicker-toggle>
+              <mat-date-range-picker #picker></mat-date-range-picker>
+            </mat-form-field>
+            <div class="generate-schedule">
+              <button mat-raised-button class="btn btn-primary" (click)="onGenerateSchedule()">
+                Generate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

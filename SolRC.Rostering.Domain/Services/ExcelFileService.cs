@@ -53,42 +53,42 @@ public class ExcelFileService : IExcelFileService
             worksheet.Cells[1, 2].Value = "Name";
             var distinctDates = tableAssignments.Select(t => t.ScheduleDate)
                 .Distinct().OrderBy(t => t.Date).ToList();
-            // for (int x = 0; x < distinctDates.Count; x++)
-            // {
-            //     // date will be the headers
-            //     worksheet.Cells[1, x + 3].Value = distinctDates[x].ToShortDateString();
-            //
-            //     var allEmployees = _employeeService.GetAll().OrderBy(e => e.Number).ToList();
-            //
-            //     for (int y = 0; y < allEmployees.Count; y++)
-            //     {
-            //         worksheet.Cells[y + 2, 1].Value = allEmployees[y].Number;
-            //
-            //         var fullName = $"{allEmployees[y].FirstName} {allEmployees[y].LastName}";
-            //         worksheet.Cells[y + 2, 2].Value = fullName;
-            //
-            //         var isOnLeave = allEmployees[y].Leaves.Any(l => l.Date.Date == distinctDates[x].Date);
-            //         if (isOnLeave)
-            //         {
-            //             worksheet.Cells[y + 2, x + 3].Value = "On Leave";
-            //         }
-            //         else
-            //         {
-            //             var employeeAssignment = tableAssignments
-            //                 .Where(t => t.ScheduleDate == distinctDates[x]
-            //                     && t.Employee.Id == allEmployees[y].Id).ToList();
-            //             if (employeeAssignment.Count > 0)
-            //             {
-            //                 var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}";
-            //                 worksheet.Cells[y + 2, x + 3].Value = tableShift;
-            //             }
-            //             else
-            //             {
-            //                 worksheet.Cells[y + 2, x + 3].Value = "Not Assigned";
-            //             }
-            //         }
-            //     }
-            // }
+            for (int x = 0; x < distinctDates.Count; x++)
+            {
+                // date will be the headers
+                worksheet.Cells[1, x + 3].Value = distinctDates[x].ToShortDateString();
+
+                var allEmployees = _employeeService.GetAll().OrderBy(e => e.Number).ToList();
+
+                for (int y = 0; y < allEmployees.Count; y++)
+                {
+                    worksheet.Cells[y + 2, 1].Value = allEmployees[y].Number;
+
+                    var fullName = $"{allEmployees[y].FirstName} {allEmployees[y].LastName}";
+                    worksheet.Cells[y + 2, 2].Value = fullName;
+
+                    var isOnLeave = allEmployees[y].Leaves.Any(l => l.Date.Date == distinctDates[x].Date);
+                    if (isOnLeave)
+                    {
+                        worksheet.Cells[y + 2, x + 3].Value = "On Leave";
+                    }
+                    else
+                    {
+                        var employeeAssignment = tableAssignments
+                            .Where(t => t.ScheduleDate == distinctDates[x]
+                                && t.Employee.Id == allEmployees[y].Id).ToList();
+                        if (employeeAssignment.Count > 0)
+                        {
+                            var tableShift = $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.ShiftClass}";
+                            worksheet.Cells[y + 2, x + 3].Value = tableShift;
+                        }
+                        else
+                        {
+                            worksheet.Cells[y + 2, x + 3].Value = "Not Assigned";
+                        }
+                    }
+                }
+            }
 
             var fileName = "ExportedData.xlsx";
             var fileInfo = new FileInfo(fileName);

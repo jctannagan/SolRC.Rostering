@@ -19,9 +19,9 @@ namespace SolRC.Rostering.Web.Controllers
         [HttpGet("download")]
         public IActionResult Index()
         {
-            var tableAssignments = scheduleService.GenerateScheduleV2();
+            var tableAssignments = scheduleService.GenerateSchedule();
             var fileLoc = this.excelFileService.ListToExcel(tableAssignments);
-            excelFileService.ListToExcelTable(tableAssignments);
+            // excelFileService.ListToExcelTable(tableAssignments);
 
             // Define the path to the file
             // var filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExportedData.xlsx");
