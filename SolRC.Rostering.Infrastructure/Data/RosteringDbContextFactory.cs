@@ -9,7 +9,7 @@ public class RosteringDbContextFactory: IDesignTimeDbContextFactory<RosteringDbC
     {
         var optionBuilder = new DbContextOptionsBuilder();
         optionBuilder.UseSqlServer(
-            @"Server=LEGION-WS-JEFF;Database=TGRMain;TrustServerCertificate=True;Trusted_Connection=True;Integrated Security=True;");
+            @"Server=LEGION-WS-JEFF;Database=TGRMainNew;TrustServerCertificate=True;Trusted_Connection=True;Integrated Security=True;");
 
         return new RosteringDbContext(optionBuilder.Options);
     }

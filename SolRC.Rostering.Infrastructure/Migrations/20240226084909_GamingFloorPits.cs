@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class updatetiomes : Migration
+    public partial class GamingFloorPits : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Times_Tables_TableId",
-                table: "Times");
+                name: "FK_Pits_GamingFloor_GamingFloorId",
+                table: "Pits");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "TableId",
-                table: "Times",
+                name: "GamingFloorId",
+                table: "Pits",
                 type: "uniqueidentifier",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
@@ -26,10 +26,10 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                 oldNullable: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Times_Tables_TableId",
-                table: "Times",
-                column: "TableId",
-                principalTable: "Tables",
+                name: "FK_Pits_GamingFloor_GamingFloorId",
+                table: "Pits",
+                column: "GamingFloorId",
+                principalTable: "GamingFloor",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }
@@ -38,22 +38,22 @@ namespace SolRC.Rostering.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Times_Tables_TableId",
-                table: "Times");
+                name: "FK_Pits_GamingFloor_GamingFloorId",
+                table: "Pits");
 
             migrationBuilder.AlterColumn<Guid>(
-                name: "TableId",
-                table: "Times",
+                name: "GamingFloorId",
+                table: "Pits",
                 type: "uniqueidentifier",
                 nullable: true,
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Times_Tables_TableId",
-                table: "Times",
-                column: "TableId",
-                principalTable: "Tables",
+                name: "FK_Pits_GamingFloor_GamingFloorId",
+                table: "Pits",
+                column: "GamingFloorId",
+                principalTable: "GamingFloor",
                 principalColumn: "Id");
         }
     }

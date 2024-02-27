@@ -16,6 +16,11 @@ public class TableRepository: ITableRepository
     
     public List<Table> GetAll()
     {
-        return _dbContext.Tables.Include(t => t.OperatingShifts).ToList();
+        return _dbContext.Tables
+            .Include(t => t.OperatingShifts)
+            .Include(t => t.Game)
+            .Include(t => t.Cluster).ThenInclude(c => c.Pit)
+            .Where(t => t.OperatingShifts.Any())
+            .ToList();
     }
 }

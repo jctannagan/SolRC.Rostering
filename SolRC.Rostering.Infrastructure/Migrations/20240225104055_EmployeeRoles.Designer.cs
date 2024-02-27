@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SolRC.Rostering.Infrastructure.Data;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     [DbContext(typeof(RosteringDbContext))]
-    partial class RosteringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240225104055_EmployeeRoles")]
+    partial class EmployeeRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,7 +177,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GamingFloorId")
+                    b.Property<Guid?>("GamingFloorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -378,13 +381,9 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
                 {
-                    b.HasOne("SolRC.Rostering.Domain.Models.GamingFloor", "GamingFloor")
+                    b.HasOne("SolRC.Rostering.Domain.Models.GamingFloor", null)
                         .WithMany("Pits")
-                        .HasForeignKey("GamingFloorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GamingFloor");
+                        .HasForeignKey("GamingFloorId");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>

@@ -16,7 +16,8 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.LastName)
             .IsRequired()
             .HasMaxLength(50);
-        
+        builder.HasOne(l => l.Role)
+            .WithMany().OnDelete(DeleteBehavior.NoAction);
         builder.HasMany(e => e.Leaves)
             .WithOne();
     }

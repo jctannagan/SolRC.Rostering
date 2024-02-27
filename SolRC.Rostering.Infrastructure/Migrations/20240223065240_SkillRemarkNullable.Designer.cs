@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SolRC.Rostering.Infrastructure.Data;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     [DbContext(typeof(RosteringDbContext))]
-    partial class RosteringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240223065240_SkillRemarkNullable")]
+    partial class SkillRemarkNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("PitId")
+                    b.Property<Guid?>("PitId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("RelieverId")
@@ -73,7 +76,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.Property<Guid?>("PitId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int?>("RoleId")
+                    b.Property<int?>("Role")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ShiftEnd")
@@ -88,8 +91,6 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PitId");
-
-                    b.HasIndex("RoleId");
 
                     b.HasIndex("StatusId");
 
@@ -174,7 +175,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GamingFloorId")
+                    b.Property<Guid?>("GamingFloorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -321,17 +322,13 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
                 {
-                    b.HasOne("SolRC.Rostering.Domain.Models.Pit", "Pit")
+                    b.HasOne("SolRC.Rostering.Domain.Models.Pit", null)
                         .WithMany("Clusters")
-                        .HasForeignKey("PitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PitId");
 
                     b.HasOne("SolRC.Rostering.Domain.Models.Employee", "Reliever")
                         .WithMany()
                         .HasForeignKey("RelieverId");
-
-                    b.Navigation("Pit");
 
                     b.Navigation("Reliever");
                 });
@@ -342,18 +339,11 @@ namespace SolRC.Rostering.Infrastructure.Migrations
                         .WithMany("Supervisor")
                         .HasForeignKey("PitId");
 
-                    b.HasOne("SolRC.Rostering.Domain.Models.Lookup", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("SolRC.Rostering.Domain.Models.Lookup", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Role");
 
                     b.Navigation("Status");
                 });
@@ -378,13 +368,9 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
                 {
-                    b.HasOne("SolRC.Rostering.Domain.Models.GamingFloor", "GamingFloor")
+                    b.HasOne("SolRC.Rostering.Domain.Models.GamingFloor", null)
                         .WithMany("Pits")
-                        .HasForeignKey("GamingFloorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GamingFloor");
+                        .HasForeignKey("GamingFloorId");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>

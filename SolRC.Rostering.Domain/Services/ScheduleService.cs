@@ -1,10 +1,13 @@
-﻿using SolRC.Rostering.Domain.Contracts.Services;
+﻿using SolRC.Rostering.Domain.Contracts.Repository;
+using SolRC.Rostering.Domain.Contracts.Services;
+using SolRC.Rostering.Domain.DTO;
 using SolRC.Rostering.Domain.Models;
 
 namespace SolRC.Rostering.Domain.Services;
 
 public class ScheduleService : IScheduleService
 {
+    private readonly IClusterService _clusterService;
     private readonly IEmployeeService _employeeService;
     private readonly ITableService _tableService;
     private readonly ITableAssignmentService _tableAssignmentService;
@@ -12,20 +15,21 @@ public class ScheduleService : IScheduleService
     public ScheduleService(
         IEmployeeService employeeService,
         ITableService tableService,
-        ITableAssignmentService tableAssignmentService)
+        ITableAssignmentService tableAssignmentService, IClusterService clusterService)
     {
         _employeeService = employeeService;
         _tableService = tableService;
         _tableAssignmentService = tableAssignmentService;
+        _clusterService = clusterService;
     }
 
     private readonly Random _rng = new Random();
 
-    //TODO: No previous assignment checking yet
-    public List<TableAssignment> GenerateSchedule()
+    [Obsolete]
+    public List<TableAssignment> GenerateSchedule_Kath()
     {
         List<Table> tables = _tableService.GetAll();
-        List<Employee> employees = _employeeService.GetAll();
+        List<Employee> employees = _employeeService.GetAllDealers();
 
         var startDate = new DateTime(2024, 01, 01);
         var endDate = new DateTime(2024, 01, 14);
@@ -38,12 +42,12 @@ public class ScheduleService : IScheduleService
             //Filter employees that are qualified to deal
             var qualifiedDealers = employees
                 .Where(e => e.Skills.Any(c => c.Game == table.Game
-                    && c.Proficiency >= table.MinRequiredProficiency));
+                    && c.Proficiency >= table.RequiredProficiency));
 
             // if no dealers meet current qualification
             // ask them to adjust table required proficiency
 
-            var prevAssignment = new List<TableAssignment>();
+            List<TableAssignment> prevAssignment;
             for (int day = 0; day <= totalDays; day++)
             {
                 // if no qualified dealers are available
@@ -80,7 +84,7 @@ public class ScheduleService : IScheduleService
                             .ToList();
                     }
 
-                    var prevAssignmentShift = prevAssignment.Where(p => p.Hours == operatingShift).FirstOrDefault();
+                    var prevAssignmentShift = prevAssignment.FirstOrDefault(p => p.Hours == operatingShift);
                     shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Employee.Id).ToList();
 
                     if (shiftMatchedDealers.Count != 0)
@@ -102,10 +106,48 @@ public class ScheduleService : IScheduleService
         return masterAssignments;
     }
 
-    public List<TableAssignment> GenerateScheduleV2()
+    public List<Cluster> GenerateRelieverSchedule(ref List<Employee> employees)
+    {
+        List<Cluster> clusters = _clusterService.GetAll();
+        
+        //filter employees skills to the most skilled
+        var relieverPool = employees.Where(s => s.Skills.Count > 18).ToList();
+        foreach (var cluster in clusters)
+        {
+            var skillRequirement = cluster.TableGames
+                .GroupBy(p => p.Game.Name)
+                .Select(g => g.OrderByDescending(p => p.RequiredProficiency).First())
+                .ToDictionary(p => p.Game.Name, p => p.RequiredProficiency);
+            var filteredPool = relieverPool.Where(e => skillRequirement
+                    .All(sr => e.Skills.Any(skill => skill.Game.Name == sr.Key && skill.Proficiency >= sr.Value)))
+                .ToList();
+
+            if (filteredPool.Count == 0)
+                continue;
+                
+            var selectedReliever = filteredPool[ThreadSafeRandomizer.ThreadRandom.Next(0, filteredPool.Count)];
+            cluster.Reliever = selectedReliever;
+            cluster.RelieverId = selectedReliever.Id;
+
+            employees.Remove(selectedReliever);
+        }
+        
+        return clusters;
+    }
+
+    public (List<Cluster> clusterReliever, List<TableAssignment> tableDealers) Generate()
+    {
+        var employees = _employeeService.GetAllDealers();
+        
+        var clustersWithRelievers = GenerateRelieverSchedule(ref employees);
+        var tableAssignments = GenerateDealerSchedule(employees);
+
+        return (clustersWithRelievers, tableAssignments);
+    }
+
+    public List<TableAssignment> GenerateDealerSchedule(List<Employee> employees)
     {
         List<Table> tables = _tableService.GetAll();
-        List<Employee> employees = _employeeService.GetAll();
 
         var startDate = new DateTime(2024, 01, 01);
         var endDate = new DateTime(2024, 01, 14);
@@ -136,7 +178,7 @@ public class ScheduleService : IScheduleService
                 //Filter employees that are qualified to deal
                 var qualifiedDealers = availableEmployees
                     .Where(e => e.Skills.Any(c => c.Game == table.Game
-                        && c.Proficiency >= table.MinRequiredProficiency));
+                        && c.Proficiency >= table.RequiredProficiency));
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {

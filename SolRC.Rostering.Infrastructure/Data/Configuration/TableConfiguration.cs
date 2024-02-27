@@ -6,18 +6,24 @@ namespace SolRC.Rostering.Infrastructure.Data.Configuration;
 
 public class TableConfiguration : IEntityTypeConfiguration<Table>
 {
-    public void Configure(EntityTypeBuilder<Table> builder)
+    public void Configure(EntityTypeBuilder<Table> table)
     {
-        builder.HasKey(e => e.Id);
-        builder.Property(e => e.Name)
+        table.HasKey(e => e.Id);
+        table.Property(e => e.Name)
             .IsRequired()
             .IsUnicode(false)
             .HasMaxLength(50);
-        builder.Property(e => e.Code)
+        table.Property(e => e.Code)
             .IsRequired()
             .IsUnicode(false)
             .HasMaxLength(50);
-        builder.HasOne(l => l.Game)
+        table.HasOne(l => l.Game)
             .WithMany().OnDelete(DeleteBehavior.NoAction);
+        table.HasMany(t => t.OperatingShifts)
+            .WithOne(o => o.Table)
+            .HasForeignKey(o => o.TableId);
+        table.HasOne<Cluster>(p => p.Cluster)
+            .WithMany(p => p.TableGames)
+            .HasForeignKey(p => p.ClusterId);
     }
 }

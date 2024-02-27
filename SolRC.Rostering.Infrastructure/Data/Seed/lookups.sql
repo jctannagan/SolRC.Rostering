@@ -92,4 +92,7 @@ values
 ('GAME', 'SSM', ''),
 ('GAME', 'BR', ''),
 ('GAME', 'SSX', ''),
-('GAME', 'PSM', '')
+('GAME', 'PSM', ''),
+('ROLE', 'DLR', 'Dealer'),
+('ROLE', 'PS', 'Pit Supervisor'),
+('ROLE', 'OSP', 'Online Studio Presenter')

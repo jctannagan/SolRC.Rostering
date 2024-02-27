@@ -7,6 +7,7 @@ public record Employee
     public Employee()
     {
         Id = Guid.NewGuid();
+        Leaves = new List<Leave>();
     }
     public Guid Id { get; init; }
     public int EmployeeNumber { get; init; }
@@ -17,6 +18,7 @@ public record Employee
     public DateTime ShiftStart { get; init; }
     public DateTime ShiftEnd { get; init; }
     public List<Skill> Skills { get; set; }
-    public RoleEnum Role { get; set; }
+    public int? RoleId { get; set; }
+    public Lookup Role { get; init; }
     public List<Leave> Leaves { get; set; }
 }

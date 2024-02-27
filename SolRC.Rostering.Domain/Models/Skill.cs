@@ -20,7 +20,7 @@ public record Skill
         }
     }
     
-    public string Remarks { get; init; }
+    public string? Remarks { get; init; }
     
     public Employee Employee { get; set; }
 };

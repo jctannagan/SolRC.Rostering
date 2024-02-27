@@ -17,8 +17,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<RosteringDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), optionsBuilder =>
+    {
+        optionsBuilder.CommandTimeout(340);
+    })
+    );
 
+builder.Services.AddScoped<IClusterService, ClusterService>();
+builder.Services.AddScoped<IClusterRepository, ClusterRepository>();
 builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<ITableRepository, TableRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();

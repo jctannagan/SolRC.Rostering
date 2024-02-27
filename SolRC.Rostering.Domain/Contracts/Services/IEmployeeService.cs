@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SolRC.Rostering.Domain.DTO;
 using SolRC.Rostering.Domain.Models;
 
 namespace SolRC.Rostering.Domain.Contracts.Services;
@@ -11,5 +12,5 @@ public interface IEmployeeService
     List<Leave> ReadEmployeeLeavesCsv(Stream fs);
     List<Employee> ReadEmployees(string path);
     List<Leave> ReadEmployeeLeaves(string path);
-    List<Employee> GetAll();
+    List<Employee> GetAllDealers();
 }

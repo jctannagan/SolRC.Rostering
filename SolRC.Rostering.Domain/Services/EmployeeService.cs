@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using SolRC.Rostering.Domain.Contracts.Services;
 using SolRC.Rostering.Domain.CsvMapping;
+using SolRC.Rostering.Domain.DTO;
 using SolRC.Rostering.Domain.Models;
 using SolRC.Rostering.Domain.Repository;
 
@@ -77,9 +78,11 @@ public class EmployeeService : IEmployeeService
         return employeeLeaves;
     }
 
-    public List<Employee> GetAll()
+    public List<Employee> GetAllDealers()
     {
-        return _employeeRepository.GetAll();
+        return _employeeRepository.GetAll()
+            .Where(p => p.Role.Name != "PS")
+            .ToList();
     }
 
     public List<Employee> ReadEmployeesCsv(Stream fs)
