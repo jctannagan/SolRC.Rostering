@@ -9,14 +9,15 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
     public void Configure(EntityTypeBuilder<Employee> builder)
     {
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Number);
+        builder.Property(e => e.EmployeeNumber);
         builder.Property(e => e.FirstName)
             .IsRequired()
             .HasMaxLength(50);
         builder.Property(e => e.LastName)
             .IsRequired()
             .HasMaxLength(50);
-        
+        builder.HasOne(l => l.Role)
+            .WithMany().OnDelete(DeleteBehavior.NoAction);
         builder.HasMany(e => e.Leaves)
             .WithOne();
     }

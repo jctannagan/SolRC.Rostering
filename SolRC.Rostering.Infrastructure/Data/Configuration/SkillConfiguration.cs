@@ -8,6 +8,7 @@ public class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {
     public void Configure(EntityTypeBuilder<Skill> builder)
     {
-        
+        builder.HasOne(l => l.Game)
+            .WithMany().OnDelete(DeleteBehavior.NoAction);
     }
 }

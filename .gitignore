@@ -8,3 +8,5 @@ packages
 # JetBrains Rider
 *.sln.iml
 /.vs
+/SolRC.Rostering.Web/tgr-spa/.angular/cache/14.2.13
+/SolRC.Rostering.Web/tgr-spa/node_modules

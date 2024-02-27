@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IO.Compression;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using SolRC.Rostering.Domain.Contracts.Services;
+using SolRC.Rostering.Domain.Models;
 
 namespace SolRC.Rostering.Web.Controllers
 {
@@ -7,8 +10,8 @@ namespace SolRC.Rostering.Web.Controllers
     [ApiController]
     public class ScheduleController : ControllerBase
     {
-        private readonly IScheduleService scheduleService;
         private readonly IExcelFileService excelFileService;
+        private readonly IScheduleService scheduleService;
 
         public ScheduleController(IScheduleService scheduleService, IExcelFileService excelFileService)
         {
@@ -19,24 +22,33 @@ namespace SolRC.Rostering.Web.Controllers
         [HttpGet("download")]
         public IActionResult Index()
         {
-            var tableAssignments = scheduleService.GenerateSchedule();
-            var fileLoc = this.excelFileService.ListToExcel(tableAssignments);
-            // excelFileService.ListToExcelTable(tableAssignments);
-
-            // Define the path to the file
-            // var filePath = Path.Combine(Directory.GetCurrentDirectory(), "ExportedData.xlsx");
-
-            // Check if the file exists
-            if (System.IO.File.Exists(fileLoc))
-            {
-                // Read the file into a FileStream
-                var fileStream = new FileStream(fileLoc, FileMode.Open, FileAccess.Read);
-
-                // Return the file with a MIME type for .xlsx files
-                return File(fileStream, "application/ms-excel", Path.GetFileName(fileLoc));
-            }
-
-            return NotFound();
+            var result = scheduleService.Generate();
+            var fileLoc = this.excelFileService.ListToExcel(result.tableDealers);
+            var fileTableView = this.excelFileService.TableViewExcelByDate(result.tableDealers, result.clusterReliever, DateTime.Parse("01/01/2024"));
+            fileTableView.Add(fileLoc);
+            return DownloadMultipleFiles(fileTableView.ToArray());
         }
+        
+        private FileResult DownloadMultipleFiles(string[] filePaths)
+        {
+            Dictionary<string,byte[]> byteArrayDict = new();
+            for (int i = 0; i < filePaths.Length; i++)
+            {
+                byteArrayDict.Add(filePaths[i], System.IO.File.ReadAllBytes(filePaths[i]));
+            }
+            
+            var zipName = $"RosteringReportFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
+            using MemoryStream ms = new MemoryStream();
+            using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+            {
+                foreach (var file in byteArrayDict)
+                {
+                    var entry = archive.CreateEntry(Path.GetFileName(file.Key), CompressionLevel.Fastest);
+                    using var zipStream = entry.Open();
+                    zipStream.Write(file.Value, 0, file.Value.Length);
+                }
+            }
+            return File(ms.ToArray(), "application/zip", zipName);
+        } 
     }
 }

@@ -9,5 +9,7 @@ public class TableAssignmentConfiguration : IEntityTypeConfiguration<TableAssign
     public void Configure(EntityTypeBuilder<TableAssignment> builder)
     {
         builder.HasKey(e => e.Id);
+        builder.HasOne(l => l.Table)
+            .WithMany().OnDelete(DeleteBehavior.NoAction);
     }
 }
