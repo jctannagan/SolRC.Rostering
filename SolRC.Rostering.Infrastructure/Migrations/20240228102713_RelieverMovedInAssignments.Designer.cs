@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SolRC.Rostering.Infrastructure.Data;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     [DbContext(typeof(RosteringDbContext))]
-    partial class RosteringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240228102713_RelieverMovedInAssignments")]
+    partial class RelieverMovedInAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

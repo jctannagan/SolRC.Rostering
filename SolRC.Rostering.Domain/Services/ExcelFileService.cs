@@ -11,19 +11,20 @@ namespace SolRC.Rostering.Domain.Services;
 public class ExcelFileService : IExcelFileService
 {
     private readonly IEmployeeService _employeeService;
-    private string _baseDir = Path.Combine(Directory.GetCurrentDirectory(),"reports");
+    private string _baseDir = Path.Combine(Directory.GetCurrentDirectory(), "reports");
     private Color _headerBgColor = ColorTranslator.FromHtml("#FFC000");
+
     public ExcelFileService(IEmployeeService employeeService)
     {
         _employeeService = employeeService;
     }
 
-    public string ListToExcel(List<TableAssignment> tableAssignments, Guid[] relievers)
+    public string ListToExcel(List<Assignments> tableAssignments, Guid[] relievers)
     {
         var allEmployees = _employeeService.GetAllDealers()
             .Where(f => !relievers.Contains(f.Id))
             .OrderBy(e => e.EmployeeNumber).ToList();
-        
+
         using (var package = new ExcelPackage())
         {
             var dates = tableAssignments.Select(p => p.ScheduleDate).Distinct();
@@ -79,7 +80,7 @@ public class ExcelFileService : IExcelFileService
                 worksheet.Cells[2, column + 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[2, column].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[2, column + 1].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                
+
                 var row = 3;
                 for (int y = 0; y < allEmployees.Count; y++)
                 {
@@ -103,12 +104,12 @@ public class ExcelFileService : IExcelFileService
                     {
                         var employeeAssignment = tableAssignments
                             .Where(t => t.ScheduleDate == distinctDates[x]
-                                        && t.Employee.Id == allEmployees[y].Id).ToList();
+                                        && t.Dealer.Id == allEmployees[y].Id).ToList();
                         if (employeeAssignment.Count > 0)
                         {
                             var tableShift =
                                 $"{employeeAssignment[0].Table.Name} | {employeeAssignment[0].Hours.Open.Hour}-{employeeAssignment[0].Hours.Close.Hour}"
-                                + $"\nPit {employeeAssignment[0].Table.Cluster?.Pit.Name}";
+                                + $"\nPit {employeeAssignment[0].Table.Cluster?.Pit.Name} | {employeeAssignment[0].Table.Cluster?.Pit.GamingFloor.Name}";
                             worksheet.Cells[row, column].Value = tableShift;
                         }
                         else
@@ -126,12 +127,12 @@ public class ExcelFileService : IExcelFileService
             var fileName = Path.Combine(_baseDir, "ExportedData.xlsx");
             using (Stream stream = File.Create(fileName))
                 package.SaveAs(stream);
-            
+
             return fileName;
         }
     }
 
-    public List<string> TableViewExcelByDate(List<TableAssignment> tableAssignments, List<Cluster> tableClusters,
+    public List<string> TableViewExcelByDate(List<Assignments> tableAssignments, List<Cluster> tableClusters,
         DateTime xDate)
     {
         List<string> fileList = new();
@@ -142,34 +143,78 @@ public class ExcelFileService : IExcelFileService
             {
                 var wb = ep.Workbook;
 
-                IEnumerable<MasterListDTO> masterList = tableAssignments.Where(t => t.ScheduleDate.Date == date)
+                // IEnumerable<MasterListDTO> masterList = tableAssignments.Where(t => t.ScheduleDate.Date == date)
+                //     .Select(ta => new
+                //     {
+                //         TableAssignment = ta,
+                //         ClusterInfo =
+                //             tableClusters.FirstOrDefault(tc => tc.Id == ta.Table.ClusterId), // Joining on ClusterId
+                //         GamingFloorId = ta.Table.Cluster?.Pit?.GamingFloor?.Id ?? Guid.Empty,
+                //         GamingFloorName = ta.Table.Cluster?.Pit?.GamingFloor?.Name ?? "No Area",
+                //         PitId = ta.Table.Cluster?.Pit?.Id ?? Guid.Empty,
+                //         PitName = ta.Table.Cluster?.Pit?.Name ?? "No Pit",
+                //     })
+                //     .GroupBy(x => new { x.GamingFloorId, x.GamingFloorName, x.PitId, x.PitName })
+                //     .Select(g => new MasterListDTO()
+                //     {
+                //         GamingFloorId = g.Key.GamingFloorId,
+                //         GamingFloorName = g.Key.GamingFloorName,
+                //         PitId = g.Key.PitId,
+                //         PitName = g.Key.PitName,
+                //         Assignments = g.Select(x => new AssignmentsDTO()
+                //         {
+                //             Id = x.TableAssignment.Id,
+                //             BatchId = x.TableAssignment.BatchId,
+                //             ScheduleDate = x.TableAssignment.ScheduleDate,
+                //             Hours = x.TableAssignment.Hours,
+                //             Employee = new EmployeeDTO()
+                //             {
+                //                 Id = x.TableAssignment.Dealer.Id,
+                //                 Name = $"{x.TableAssignment.Dealer.LastName}, {x.TableAssignment.Dealer.FirstName}"
+                //             },
+                //             Table = x.TableAssignment.Table != null
+                //                 ? new TableDTO
+                //                 {
+                //                     Id = x.TableAssignment.Table.Id,
+                //                     Name = x.TableAssignment.Table.Name,
+                //                     Code = x.TableAssignment.Table.Code,
+                //                     GameCode = x.TableAssignment.Table.Game.Name,
+                //                     RequiredProficiency = x.TableAssignment.Table.RequiredProficiency,
+                //                     ClusterName = x.ClusterInfo?.Name ?? "No Cluster",
+                //                     RelieverName = $"{x.TableAssignment.Reliever.LastName}, {x.TableAssignment.Reliever.FirstName}" ?? "UNFILLED",
+                //                     OperatingShifts = x.TableAssignment.Table.OperatingShifts
+                //                 }
+                //                 : null
+                //         }).ToList()
+                //     });
+
+                IEnumerable<MasterListDTO> masterList = tableAssignments
+                    .Where(t => t.ScheduleDate.Date == date) // Ensure you define and set 'date' appropriately
                     .Select(ta => new
                     {
                         TableAssignment = ta,
-                        ClusterInfo =
-                            tableClusters.FirstOrDefault(tc => tc.Id == ta.Table.ClusterId), // Joining on ClusterId
                         GamingFloorId = ta.Table.Cluster?.Pit?.GamingFloor?.Id ?? Guid.Empty,
                         GamingFloorName = ta.Table.Cluster?.Pit?.GamingFloor?.Name ?? "No Area",
                         PitId = ta.Table.Cluster?.Pit?.Id ?? Guid.Empty,
                         PitName = ta.Table.Cluster?.Pit?.Name ?? "No Pit",
                     })
                     .GroupBy(x => new { x.GamingFloorId, x.GamingFloorName, x.PitId, x.PitName })
-                    .Select(g => new MasterListDTO()
+                    .Select(g => new MasterListDTO
                     {
                         GamingFloorId = g.Key.GamingFloorId,
                         GamingFloorName = g.Key.GamingFloorName,
                         PitId = g.Key.PitId,
                         PitName = g.Key.PitName,
-                        Assignments = g.Select(x => new AssignmentsDTO()
+                        Assignments = g.Select(x => new AssignmentsDTO
                         {
                             Id = x.TableAssignment.Id,
                             BatchId = x.TableAssignment.BatchId,
                             ScheduleDate = x.TableAssignment.ScheduleDate,
                             Hours = x.TableAssignment.Hours,
-                            Employee = new EmployeeDTO()
+                            Dealer = new EmployeeDTO
                             {
-                                Id = x.TableAssignment.Employee.Id,
-                                Name = $"{x.TableAssignment.Employee.LastName}, {x.TableAssignment.Employee.FirstName}"
+                                Id = x.TableAssignment.DealerId,
+                                Name = $"{x.TableAssignment.Dealer.LastName}, {x.TableAssignment.Dealer.FirstName}"
                             },
                             Table = x.TableAssignment.Table != null
                                 ? new TableDTO
@@ -177,15 +222,17 @@ public class ExcelFileService : IExcelFileService
                                     Id = x.TableAssignment.Table.Id,
                                     Name = x.TableAssignment.Table.Name,
                                     Code = x.TableAssignment.Table.Code,
-                                    GameCode = x.TableAssignment.Table.Game.Name,
+                                    GameCode = x.TableAssignment.Table.Game?.Name ?? "No Game",
                                     RequiredProficiency = x.TableAssignment.Table.RequiredProficiency,
-                                    ClusterName = x.ClusterInfo?.Name ?? "No Cluster",
-                                    RelieverName = x.ClusterInfo?.Reliever?.FirstName ?? "UNFILLED",
+                                    ClusterName = x.TableAssignment.Table.Cluster?.Name ?? "No Cluster",
+                                    RelieverName = x.TableAssignment.Reliever != null
+                                        ? $"{x.TableAssignment.Reliever.LastName}, {x.TableAssignment.Reliever.FirstName}"
+                                        : "UNFILLED",
                                     OperatingShifts = x.TableAssignment.Table.OperatingShifts
                                 }
                                 : null
                         }).ToList()
-                    });
+                    }).ToList();
 
                 foreach (var groupedArea in masterList.GroupBy(p => p.GamingFloorName))
                 {
@@ -197,14 +244,15 @@ public class ExcelFileService : IExcelFileService
                         ws.Column(1).Width = 30;
                         ws.Column(2).Width = 30;
                         ws.Column(3).Width = 30;
-                        
+
                         ws.Cells[row, 1].Value = $"Pit {area.PitName}";
                         ws.Cells[row, 1].Style.Font.Bold = true;
                         ws.Cells[row, 1].Style.Font.Size = 12;
                         ws.Cells[row, 1, row, 3].Merge = true;
-                        ws.Cells[row, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                        ws.Cells[row, 1].Style.HorizontalAlignment =
+                            OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                         row++;
-                        
+
                         //Note
                         ws.Cells[row, 1].Value = $"This report displays tables in location Pit {area.PitName} with" +
                                                  $" all shift classes on {date.ToString("dddd, MMM ddm, yyy")}";
@@ -212,7 +260,7 @@ public class ExcelFileService : IExcelFileService
                         ws.Cells[row, 1].Style.WrapText = true;
                         ws.Cells[row, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                         row++;
-                        
+
                         //Header for Pit (Table, Dealer, Dealer(Brk))
                         ws.Cells[row, 1].Value = "Table";
                         ws.Cells[row, 2].Value = "Dealer";
@@ -224,14 +272,15 @@ public class ExcelFileService : IExcelFileService
                         var assignmentCount = area.Assignments.Count;
                         for (int i = 0; i < area.Assignments.Count; i++)
                         {
-                            ws.Cells[row + i, 1].Value = $"{area.Assignments[i].Table.Name} \n{area.Assignments[i].Table.GameCode}{area.Assignments[i].Table.RequiredProficiency}+";
-                            ws.Cells[row + i, 2].Value = $"{area.Assignments[i].Employee.Name} " +
+                            ws.Cells[row + i, 1].Value =
+                                $"{area.Assignments[i].Table.Name} \n{area.Assignments[i].Table.GameCode}{area.Assignments[i].Table.RequiredProficiency}+";
+                            ws.Cells[row + i, 2].Value = $"{area.Assignments[i].Dealer.Name} " +
                                                          $"\n\n{area.Assignments[i].Hours.Open.Hour} - {area.Assignments[i].Hours.Close.Hour}" +
                                                          $"\n{area.Assignments[i].Table.Code}";
                             ws.Cells[row + i, 3].Value = $"{area.Assignments[i].Table.RelieverName} " +
                                                          $"\n\n{area.Assignments[i].Hours.Open.Hour} - {area.Assignments[i].Hours.Close.Hour}" +
                                                          $"\n{area.Assignments[i].Table.ClusterName}";
-                            
+
                             ws.Cells[row + i, 1].Style.WrapText = true;
                             ws.Cells[row + i, 2].Style.WrapText = true;
                             ws.Cells[row + i, 3].Style.WrapText = true;
@@ -251,24 +300,25 @@ public class ExcelFileService : IExcelFileService
 
         return fileList;
     }
-    
-    
+
+
     #region "Unused"
-    public string ListToExcelTable(List<TableAssignment> tableAssignments)
+
+    public string ListToExcelTable(List<Assignments> tableAssignments)
     {
         using (var package = new ExcelPackage())
         {
             var worksheet = package.Workbook.Worksheets.Add("Sheet1");
 
             var filth = tableAssignments.Select(t => t)
-                .Distinct().OrderBy(t => (t.ScheduleDate, t.Employee.FirstName, t.Employee.LastName)).ToList();
+                .Distinct().OrderBy(t => (t.ScheduleDate, t.Dealer.FirstName, t.Dealer.LastName)).ToList();
 
             for (int x = 0; x < filth.Count; x++)
             {
                 // date will be the headers
                 worksheet.Cells[x + 1, 1].Value = filth[x].ScheduleDate.ToString();
 
-                var employeeName = $"{filth[x].Employee.FirstName} {filth[x].Employee.LastName}";
+                var employeeName = $"{filth[x].Dealer.FirstName} {filth[x].Dealer.LastName}";
                 worksheet.Cells[x + 1, 2].Value = employeeName;
 
                 var tableShift = $"{filth[x].Table.Name} {filth[x].Hours.ShiftClass}";
@@ -283,5 +333,6 @@ public class ExcelFileService : IExcelFileService
             return fileInfo.FullName;
         }
     }
+
     #endregion
 }

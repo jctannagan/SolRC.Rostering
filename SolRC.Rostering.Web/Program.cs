@@ -31,7 +31,7 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<ITableAssignmentService, TableAssignmentService>();
-builder.Services.AddScoped<ITableAssignmentRepository, TableAssignmentRepository>();
+builder.Services.AddScoped<ITableAssignmentRepository, AssignmentRepository>();
 builder.Services.AddScoped<IExcelFileService,ExcelFileService>();
 
 builder.Services.AddCors(options =>

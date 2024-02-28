@@ -4,8 +4,8 @@ namespace SolRC.Rostering.Domain.Contracts.Services
 {
     public interface IExcelFileService
     {
-        string ListToExcel(List<TableAssignment> tableAssignments, Guid[] relievers);
-        string ListToExcelTable(List<TableAssignment> tableAssignments);
-        List<string> TableViewExcelByDate(List<TableAssignment> tableAssignments, List<Cluster> tableClusters, DateTime date);
+        string ListToExcel(List<Assignments> tableAssignments, Guid[] relievers);
+        string ListToExcelTable(List<Assignments> tableAssignments);
+        List<string> TableViewExcelByDate(List<Assignments> tableAssignments, List<Cluster> tableClusters, DateTime date);
     }
 }

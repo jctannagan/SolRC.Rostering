@@ -25,22 +25,36 @@ public class ScheduleService : IScheduleService
 
     private readonly Random _rng = new Random();
     
-    public (List<Cluster> clusterReliever, List<TableAssignment> tableDealers) Generate()
+    public (List<Cluster> clusterReliever, List<Assignments> tableDealers) Generate()
     {
         var employees = _employeeService.GetAllDealers();
-        
-        var clustersWithRelievers = GenerateRelieverSchedule(ref employees);
+
+        List<Cluster> clustersWithRelievers = new();
+        var assignedRelievers = GenerateRelieverSchedule(ref employees, out clustersWithRelievers);
         var tableAssignments = GenerateDealerSchedule(employees);
+
+        foreach (var assignedReliever in assignedRelievers)
+        {
+            tableAssignments.Where(f => f.Cluster?.Id == assignedReliever.Key)
+                .ToList()
+                .ForEach(a =>
+                {
+                    a.RelieverId = assignedReliever.Value.Id;
+                    a.Reliever = assignedReliever.Value;
+                });
+        }
 
         return (clustersWithRelievers, tableAssignments);
     }
     
-    public List<Cluster> GenerateRelieverSchedule(ref List<Employee> employees)
+    public Dictionary<Guid, Employee> GenerateRelieverSchedule(ref List<Employee> employees, out List<Cluster> clusters)
     {
-        List<Cluster> clusters = _clusterService.GetAll();
+        Dictionary<Guid, Employee> relieverDict = new();
+        clusters = _clusterService.GetAll();
         
-        //filter employees skills to the most skilled
-        var relieverPool = employees.Where(s => s.Skills.Count > 18).ToList();
+        //filter employees with the most number of skills
+        var skillsCount = 18; //arbitrary number of skills for a reliever
+        var relieverPool = employees.Where(s => s.Skills.Count > skillsCount).ToList();
         foreach (var cluster in clusters)
         {
             var skillRequirement = cluster.TableGames
@@ -55,17 +69,16 @@ public class ScheduleService : IScheduleService
                 continue;
                 
             var selectedReliever = filteredPool[ThreadSafeRandomizer.ThreadRandom.Next(0, filteredPool.Count)];
-            cluster.Reliever = selectedReliever;
-            cluster.RelieverId = selectedReliever.Id;
+            relieverDict.Add(cluster.Id, selectedReliever);
 
             employees.Remove(selectedReliever);
         }
         
-        return clusters;
+        return relieverDict;
     }
 
-    public List<TableAssignment> GenerateDealerSchedule(List<Employee> employees)
-    {
+    public List<Assignments> GenerateDealerSchedule(List<Employee> employees)
+         {
         List<Table> tables = _tableService.GetAll();
 
         var startDate = new DateTime(2024, 01, 01);
@@ -73,7 +86,7 @@ public class ScheduleService : IScheduleService
         var totalDays = (endDate - startDate).TotalDays;
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
-        List<TableAssignment> masterAssignments = new();
+        List<Assignments> masterAssignments = new();
         for (int day = 0; day <= totalDays; day++)
         {
             var currentDate = startDate.AddDays(day);
@@ -90,7 +103,7 @@ public class ScheduleService : IScheduleService
 
                 if (assignedToday.Count() != 0)
                 {
-                    var exclude = assignedToday.Select(p => p.Employee.Id).Distinct().ToArray();
+                    var exclude = assignedToday.Select(p => p.Dealer.Id).Distinct().ToArray();
                     availableEmployees = availableEmployees.Where(a => !exclude.Contains(a.Id)).ToList();
                 }
 
@@ -101,7 +114,7 @@ public class ScheduleService : IScheduleService
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
-                    TableAssignment assignment = new();
+                    Assignments assignment = new();
                     assignment.ScheduleDate = currentDate;
 
                     // This removes the dealer that was assigned to the same table and shift yesterday
@@ -110,7 +123,7 @@ public class ScheduleService : IScheduleService
                         var exclude = masterAssignments
                             .Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
                                 && a.Table.Name == operatingShift.Table.Name)
-                            .Select(p => p.Employee.Id)
+                            .Select(p => p.Dealer.Id)
                             .Distinct()
                             .ToArray();
                         qualifiedDealers = qualifiedDealers.Where(a => !exclude.Contains(a.Id)).ToList();
@@ -125,8 +138,10 @@ public class ScheduleService : IScheduleService
 
                     if (shiftMatchedDealers.Count != 0)
                     {
-                        var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
-                        assignment.Employee = theChosenOne;
+                        var selectedDealer = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
+                        assignment.Cluster = table.Cluster;
+                        assignment.DealerId = selectedDealer.Id;
+                        assignment.Dealer = selectedDealer;
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
                         masterAssignments.Add(assignment);
@@ -145,7 +160,7 @@ public class ScheduleService : IScheduleService
     
     #region "Obsolete"
     [Obsolete]
-    public List<TableAssignment> GenerateSchedule_Kath()
+    public List<Assignments> GenerateSchedule_Kath()
     {
         List<Table> tables = _tableService.GetAll();
         List<Employee> employees = _employeeService.GetAllDealers();
@@ -155,7 +170,7 @@ public class ScheduleService : IScheduleService
         var totalDays = (endDate - startDate).TotalDays;
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
-        List<TableAssignment> masterAssignments = new();
+        List<Assignments> masterAssignments = new();
         foreach (var table in tables)
         {
             //Filter employees that are qualified to deal
@@ -166,7 +181,7 @@ public class ScheduleService : IScheduleService
             // if no dealers meet current qualification
             // ask them to adjust table required proficiency
 
-            List<TableAssignment> prevAssignment;
+            List<Assignments> prevAssignment;
             for (int day = 0; day <= totalDays; day++)
             {
                 // if no qualified dealers are available
@@ -174,7 +189,7 @@ public class ScheduleService : IScheduleService
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
-                    TableAssignment assignment = new();
+                    Assignments assignment = new();
 
                     assignment.ScheduleDate = startDate.AddDays(day);
 
@@ -204,12 +219,12 @@ public class ScheduleService : IScheduleService
                     }
 
                     var prevAssignmentShift = prevAssignment.FirstOrDefault(p => p.Hours == operatingShift);
-                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Employee.Id).ToList();
+                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Dealer.Id).ToList();
 
                     if (shiftMatchedDealers.Count != 0)
                     {
                         var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
-                        assignment.Employee = theChosenOne;
+                        assignment.Dealer = theChosenOne;
                         assignment.Table = operatingShift.Table;
                         assignment.Hours = operatingShift;
                         masterAssignments.Add(assignment);
