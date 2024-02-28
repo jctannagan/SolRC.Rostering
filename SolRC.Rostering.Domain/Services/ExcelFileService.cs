@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Net.Mime;
 using SolRC.Rostering.Domain.Models;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -10,51 +11,24 @@ namespace SolRC.Rostering.Domain.Services;
 public class ExcelFileService : IExcelFileService
 {
     private readonly IEmployeeService _employeeService;
-
+    private string _baseDir = Path.Combine(Directory.GetCurrentDirectory(),"reports");
+    private Color _headerBgColor = ColorTranslator.FromHtml("#FFC000");
     public ExcelFileService(IEmployeeService employeeService)
     {
         _employeeService = employeeService;
     }
 
-    public string ListToExcelTable(List<TableAssignment> tableAssignments)
+    public string ListToExcel(List<TableAssignment> tableAssignments, Guid[] relievers)
     {
-        using (var package = new ExcelPackage())
-        {
-            var worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
-            var filth = tableAssignments.Select(t => t)
-                .Distinct().OrderBy(t => (t.ScheduleDate, t.Employee.FirstName, t.Employee.LastName)).ToList();
-
-            for (int x = 0; x < filth.Count; x++)
-            {
-                // date will be the headers
-                worksheet.Cells[x + 1, 1].Value = filth[x].ScheduleDate.ToString();
-
-                var employeeName = $"{filth[x].Employee.FirstName} {filth[x].Employee.LastName}";
-                worksheet.Cells[x + 1, 2].Value = employeeName;
-
-                var tableShift = $"{filth[x].Table.Name} {filth[x].Hours.ShiftClass}";
-                worksheet.Cells[x + 1, 3].Value = tableShift;
-            }
-
-            var fileName = "ExportedDataTable.xlsx";
-            var fileInfo = new FileInfo(fileName);
-
-            package.SaveAs(fileInfo);
-
-            return fileInfo.FullName;
-        }
-    }
-
-    public string ListToExcel(List<TableAssignment> tableAssignments)
-    {
+        var allEmployees = _employeeService.GetAllDealers()
+            .Where(f => !relievers.Contains(f.Id))
+            .OrderBy(e => e.EmployeeNumber).ToList();
+        
         using (var package = new ExcelPackage())
         {
             var dates = tableAssignments.Select(p => p.ScheduleDate).Distinct();
             var minDate = dates.Min();
             var maxDate = dates.Max();
-
-            Color headerBgColor = ColorTranslator.FromHtml("#FFC000");
 
             var worksheet = package.Workbook.Worksheets.Add("Sheet1");
             worksheet.Cells[1, 3, 1, 4].Merge = true;
@@ -70,7 +44,7 @@ public class ExcelFileService : IExcelFileService
             worksheet.Cells[2, 1].Value = "EmpNumber";
             worksheet.Cells[2, 1].Style.Font.Bold = true;
             worksheet.Cells[2, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            worksheet.Cells[2, 1].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+            worksheet.Cells[2, 1].Style.Fill.BackgroundColor.SetColor(_headerBgColor);
             worksheet.Cells[2, 1].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
             worksheet.Cells[2, 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
             worksheet.Cells[2, 1].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -79,7 +53,7 @@ public class ExcelFileService : IExcelFileService
             worksheet.Cells[2, 2].Value = "Name";
             worksheet.Cells[2, 2].Style.Font.Bold = true;
             worksheet.Cells[2, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            worksheet.Cells[2, 2].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+            worksheet.Cells[2, 2].Style.Fill.BackgroundColor.SetColor(_headerBgColor);
             worksheet.Cells[2, 2].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
             worksheet.Cells[2, 2].Style.Border.Top.Style = ExcelBorderStyle.Thin;
             worksheet.Cells[2, 2].Style.Border.Left.Style = ExcelBorderStyle.Thin;
@@ -98,15 +72,14 @@ public class ExcelFileService : IExcelFileService
                     OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
                 worksheet.Cells[2, column].Style.Font.Bold = true;
                 worksheet.Cells[2, column].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                worksheet.Cells[2, column].Style.Fill.BackgroundColor.SetColor(headerBgColor);
+                worksheet.Cells[2, column].Style.Fill.BackgroundColor.SetColor(_headerBgColor);
                 worksheet.Cells[2, column].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
                 worksheet.Cells[2, column + 1].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
                 worksheet.Cells[2, column].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[2, column + 1].Style.Border.Top.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[2, column].Style.Border.Left.Style = ExcelBorderStyle.Thin;
                 worksheet.Cells[2, column + 1].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-
-                var allEmployees = _employeeService.GetAllDealers().OrderBy(e => e.EmployeeNumber).ToList();
+                
                 var row = 3;
                 for (int y = 0; y < allEmployees.Count; y++)
                 {
@@ -150,12 +123,11 @@ public class ExcelFileService : IExcelFileService
                 column += 2;
             }
 
-            var fileName = "ExportedData.xlsx";
-            var fileInfo = new FileInfo(fileName);
-
-            package.SaveAs(fileInfo);
-
-            return fileInfo.FullName;
+            var fileName = Path.Combine(_baseDir, "ExportedData.xlsx");
+            using (Stream stream = File.Create(fileName))
+                package.SaveAs(stream);
+            
+            return fileName;
         }
     }
 
@@ -197,7 +169,7 @@ public class ExcelFileService : IExcelFileService
                             Employee = new EmployeeDTO()
                             {
                                 Id = x.TableAssignment.Employee.Id,
-                                FirstName = x.TableAssignment.Employee.FirstName
+                                Name = $"{x.TableAssignment.Employee.LastName}, {x.TableAssignment.Employee.FirstName}"
                             },
                             Table = x.TableAssignment.Table != null
                                 ? new TableDTO
@@ -205,6 +177,8 @@ public class ExcelFileService : IExcelFileService
                                     Id = x.TableAssignment.Table.Id,
                                     Name = x.TableAssignment.Table.Name,
                                     Code = x.TableAssignment.Table.Code,
+                                    GameCode = x.TableAssignment.Table.Game.Name,
+                                    RequiredProficiency = x.TableAssignment.Table.RequiredProficiency,
                                     ClusterName = x.ClusterInfo?.Name ?? "No Cluster",
                                     RelieverName = x.ClusterInfo?.Reliever?.FirstName ?? "UNFILLED",
                                     OperatingShifts = x.TableAssignment.Table.OperatingShifts
@@ -220,43 +194,94 @@ public class ExcelFileService : IExcelFileService
                     int row = 1;
                     foreach (var area in groupedArea)
                     {
+                        ws.Column(1).Width = 30;
+                        ws.Column(2).Width = 30;
+                        ws.Column(3).Width = 30;
+                        
                         ws.Cells[row, 1].Value = $"Pit {area.PitName}";
+                        ws.Cells[row, 1].Style.Font.Bold = true;
+                        ws.Cells[row, 1].Style.Font.Size = 12;
                         ws.Cells[row, 1, row, 3].Merge = true;
-                        row += 2;
+                        ws.Cells[row, 1].Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                        row++;
                         
                         //Note
                         ws.Cells[row, 1].Value = $"This report displays tables in location Pit {area.PitName} with" +
-                                                 $"a shift class of --- on {date.ToString("dddd, MMM ddm, yyy")}";
-                        ws.Cells[row, 1, row, 3].Merge = true;
+                                                 $" all shift classes on {date.ToString("dddd, MMM ddm, yyy")}";
+                        ws.Row(row).Height = 70;
+                        ws.Cells[row, 1].Style.WrapText = true;
+                        ws.Cells[row, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                         row++;
                         
                         //Header for Pit (Table, Dealer, Dealer(Brk))
                         ws.Cells[row, 1].Value = "Table";
                         ws.Cells[row, 2].Value = "Dealer";
                         ws.Cells[row, 3].Value = "Dealer(Brk)";
+                        ws.Cells[row, 1, row, 3].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        ws.Cells[row, 1, row, 3].Style.Fill.BackgroundColor.SetColor(_headerBgColor);
                         row++;
 
                         var assignmentCount = area.Assignments.Count;
                         for (int i = 0; i < area.Assignments.Count; i++)
                         {
-                            ws.Cells[row + i, 1].Value = area.Assignments[i].Table.Name;
-                            ws.Cells[row + i, 2].Value = area.Assignments[i].Employee.FirstName;
-                            ws.Cells[row + i, 3].Value = area.Assignments[i].Table.RelieverName;
+                            ws.Cells[row + i, 1].Value = $"{area.Assignments[i].Table.Name} \n{area.Assignments[i].Table.GameCode}{area.Assignments[i].Table.RequiredProficiency}+";
+                            ws.Cells[row + i, 2].Value = $"{area.Assignments[i].Employee.Name} " +
+                                                         $"\n\n{area.Assignments[i].Hours.Open.Hour} - {area.Assignments[i].Hours.Close.Hour}" +
+                                                         $"\n{area.Assignments[i].Table.Code}";
+                            ws.Cells[row + i, 3].Value = $"{area.Assignments[i].Table.RelieverName} " +
+                                                         $"\n\n{area.Assignments[i].Hours.Open.Hour} - {area.Assignments[i].Hours.Close.Hour}" +
+                                                         $"\n{area.Assignments[i].Table.ClusterName}";
+                            
+                            ws.Cells[row + i, 1].Style.WrapText = true;
+                            ws.Cells[row + i, 2].Style.WrapText = true;
+                            ws.Cells[row + i, 3].Style.WrapText = true;
                         }
 
                         row += assignmentCount + 1;
                     }
                 }
 
-                var fileName = $"Pit Sheet {date.ToString("MMddyyyy")}.xlsx";
-                var fileInfo = new FileInfo(fileName);
+                var fileName = Path.Combine(_baseDir, $"Pit Sheet {date.ToString("MMddyyyy")}.xlsx");
+                using (Stream stream = File.Create(fileName))
+                    ep.SaveAs(stream);
 
-                ep.SaveAs(fileInfo);
-
-                fileList.Add(fileInfo.FullName);
+                fileList.Add(fileName);
             }
         }
 
         return fileList;
     }
+    
+    
+    #region "Unused"
+    public string ListToExcelTable(List<TableAssignment> tableAssignments)
+    {
+        using (var package = new ExcelPackage())
+        {
+            var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+            var filth = tableAssignments.Select(t => t)
+                .Distinct().OrderBy(t => (t.ScheduleDate, t.Employee.FirstName, t.Employee.LastName)).ToList();
+
+            for (int x = 0; x < filth.Count; x++)
+            {
+                // date will be the headers
+                worksheet.Cells[x + 1, 1].Value = filth[x].ScheduleDate.ToString();
+
+                var employeeName = $"{filth[x].Employee.FirstName} {filth[x].Employee.LastName}";
+                worksheet.Cells[x + 1, 2].Value = employeeName;
+
+                var tableShift = $"{filth[x].Table.Name} {filth[x].Hours.ShiftClass}";
+                worksheet.Cells[x + 1, 3].Value = tableShift;
+            }
+
+            var fileName = "ExportedDataTable.xlsx";
+            var fileInfo = new FileInfo(fileName);
+
+            package.SaveAs(fileInfo);
+
+            return fileInfo.FullName;
+        }
+    }
+    #endregion
 }
