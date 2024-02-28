@@ -19,11 +19,14 @@ namespace SolRC.Rostering.Web.Controllers
             this.excelFileService = excelFileService;
         }
 
-        [HttpGet("download")]
+        [HttpGet("generate")]
         public IActionResult Index()
         {
             var result = scheduleService.Generate();
-            var fileLoc = this.excelFileService.ListToExcel(result.tableDealers);
+            Guid[] relieverArr = result.clusterReliever
+                .Where(f => f.RelieverId != null)
+                .Select(f => f.RelieverId.Value!).ToArray();
+            var fileLoc = this.excelFileService.ListToExcel(result.tableDealers, relieverArr);
             var fileTableView = this.excelFileService.TableViewExcelByDate(result.tableDealers, result.clusterReliever, DateTime.Parse("01/01/2024"));
             fileTableView.Add(fileLoc);
             return DownloadMultipleFiles(fileTableView.ToArray());
