@@ -11,5 +11,6 @@ public class TableDTO
     public int RequiredProficiency { get; set; }
     public string ClusterName { get; set; }
     public string RelieverName { get; set; }
+    public string RelieverSkills { get; set; }
     public List<Time> OperatingShifts { get; set; }
 }

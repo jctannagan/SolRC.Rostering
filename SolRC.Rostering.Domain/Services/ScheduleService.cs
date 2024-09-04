@@ -23,66 +23,99 @@ public class ScheduleService : IScheduleService
         _clusterService = clusterService;
     }
 
-    private readonly Random _rng = new Random();
-    
-    public (List<Cluster> clusterReliever, List<Assignments> tableDealers) Generate()
+    public (List<AssignmentsClusterDTO> clusterReliever, List<Assignments> tableDealers) Generate()
     {
+        DateTime startDate = new DateTime(2024, 01, 01);
+        DateTime endDate = new DateTime(2024, 01, 14);
         var employees = _employeeService.GetAllDealers();
+        
+        List<Cluster> clusters = new();
+		var assignedRelievers = GenerateRelieverSchedule(startDate, endDate, ref employees, out clusters);
+        var tableAssignments = GenerateDealerSchedule(startDate, endDate, employees);
 
-        List<Cluster> clustersWithRelievers = new();
-        var assignedRelievers = GenerateRelieverSchedule(ref employees, out clustersWithRelievers);
-        var tableAssignments = GenerateDealerSchedule(employees);
-
-        foreach (var assignedReliever in assignedRelievers)
+        var totalDays = (endDate - startDate).TotalDays;
+        for (int day = 0; day <= totalDays; day++)
         {
-            tableAssignments.Where(f => f.Cluster?.Id == assignedReliever.Key)
-                .ToList()
-                .ForEach(a =>
-                {
-                    a.RelieverId = assignedReliever.Value.Id;
-                    a.Reliever = assignedReliever.Value;
-                });
-        }
+	        var currentDate = startDate.AddDays(day);
+	        var dailyTableAssignments = tableAssignments.Where(p => p.ScheduleDate == currentDate).ToList();
+			foreach (var assignedReliever in assignedRelievers.Where(x => x.AssignmentDate == currentDate).ToList())
+			{
+				dailyTableAssignments.Where(f => f.Cluster?.Id == assignedReliever.ClusterId)
+					.Where(o => o.Hours.Open.Hour == assignedReliever.OpenTime.Hour && o.Hours.Close.Hour == assignedReliever.CloseTime.Hour)
+					.ToList()
+					.ForEach(x =>
+						{
+							x.Reliever = assignedReliever.Reliever;
+                            x.RelieverId = assignedReliever.Reliever.Id;
+						}
+					);
 
-        return (clustersWithRelievers, tableAssignments);
+			}
+		}
+
+		return (assignedRelievers, tableAssignments);
     }
-    
-    public Dictionary<Guid, Employee> GenerateRelieverSchedule(ref List<Employee> employees, out List<Cluster> clusters)
+
+    public List<AssignmentsClusterDTO> GenerateRelieverSchedule(DateTime startDate, DateTime endDate, ref List<Employee> employees, out List<Cluster> clusters)
     {
-        Dictionary<Guid, Employee> relieverDict = new();
+        List<AssignmentsClusterDTO> relieverTuples = new();
         clusters = _clusterService.GetAll();
-        
-        //filter employees with the most number of skills
-        var skillsCount = 18; //arbitrary number of skills for a reliever
-        var relieverPool = employees.Where(s => s.Skills.Count > skillsCount).ToList();
-        foreach (var cluster in clusters)
+
+        var skillsCount = 18; // arbitrary number of skills for a reliever
+        // filter employees with the most number of skills
+        var skilledPool = employees.Where(s => s.Skills.Count > skillsCount).ToList();
+
+		var totalDays = (endDate - startDate).TotalDays;
+        for (int day = 0; day <= totalDays; day++)
         {
-            var skillRequirement = cluster.TableGames
-                .GroupBy(p => p.Game.Name)
-                .Select(g => g.OrderByDescending(p => p.RequiredProficiency).First())
-                .ToDictionary(p => p.Game.Name, p => p.RequiredProficiency);
-            var filteredPool = relieverPool.Where(e => skillRequirement
-                    .All(sr => e.Skills.Any(skill => skill.Game.Name == sr.Key && skill.Proficiency >= sr.Value)))
-                .ToList();
+	        var currentDate = startDate.AddDays(day);
+            var availableSkilledPool = skilledPool
+				.Where(e => e.Leaves == null
+	                        || e.Leaves.All(l => l.Date.Date != currentDate))
+	            .ToList();
 
-            if (filteredPool.Count == 0)
-                continue;
-                
-            var selectedReliever = filteredPool[ThreadSafeRandomizer.ThreadRandom.Next(0, filteredPool.Count)];
-            relieverDict.Add(cluster.Id, selectedReliever);
+			foreach (var cluster in clusters)
+	        {
+				var schedules = cluster.TableGames.SelectMany(t => t.OperatingShifts)
+			        .Select(s => new { s.Open, s.Close })
+			        .Distinct()
+			        .ToList();
 
-            employees.Remove(selectedReliever);
-        }
-        
-        return relieverDict;
+		        foreach (var schedule in schedules)
+		        {
+			        var skillRequirement = cluster.TableGames
+				        .GroupBy(p => p.Game.Name)
+				        .Select(g => g.OrderByDescending(p => p.RequiredProficiency).First())
+				        .ToDictionary(p => p.Game.Name, p => p.RequiredProficiency);
+
+			        var relieverPool = availableSkilledPool.Where(e => skillRequirement
+					        .All(sr => e.Skills.Any(skill => skill.Game.Name == sr.Key && skill.Proficiency >= sr.Value)))
+				        .ToList();
+
+			        var shiftMatchedRelievers = relieverPool
+						.Where(q => q.ShiftStart == schedule.Open
+				                    && q.ShiftEnd == schedule.Close)
+				        .Select(s => s)
+				        .ToList();
+
+			        if (shiftMatchedRelievers.Count == 0)
+				        continue;
+
+			        var selectedReliever = shiftMatchedRelievers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedRelievers.Count)];
+			        relieverTuples.Add(new AssignmentsClusterDTO(cluster.Id, currentDate, schedule.Open, schedule.Close, selectedReliever));
+
+			        employees.Remove(selectedReliever);
+		        }
+	        }
+		}
+
+        return relieverTuples;
     }
 
-    public List<Assignments> GenerateDealerSchedule(List<Employee> employees)
-         {
+    public List<Assignments> GenerateDealerSchedule(DateTime startDate, DateTime endDate, List<Employee> employees)
+    {
         List<Table> tables = _tableService.GetAll();
 
-        var startDate = new DateTime(2024, 01, 01);
-        var endDate = new DateTime(2024, 01, 14);
         var totalDays = (endDate - startDate).TotalDays;
 
         //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
@@ -94,23 +127,23 @@ public class ScheduleService : IScheduleService
             {
                 var availableEmployees = employees
                     .Where(e => e.Leaves == null
-                        || !e.Leaves.Any(l => l.Date.Date == currentDate))
+                                || e.Leaves.All(l => l.Date.Date != currentDate))
                     .ToList();
 
                 var assignedToday = masterAssignments
                     .Where(s => s.ScheduleDate == currentDate)
                     .AsEnumerable();
 
-                if (assignedToday.Count() != 0)
+                if (assignedToday.Any())
                 {
-                    var exclude = assignedToday.Select(p => p.Dealer.Id).Distinct().ToArray();
+                    var exclude = assignedToday.Select(p => p.Dealer?.Id).Distinct().ToArray();
                     availableEmployees = availableEmployees.Where(a => !exclude.Contains(a.Id)).ToList();
                 }
 
                 //Filter employees that are qualified to deal
                 var qualifiedDealers = availableEmployees
                     .Where(e => e.Skills.Any(c => c.Game == table.Game
-                        && c.Proficiency >= table.RequiredProficiency));
+                                                  && c.Proficiency >= table.RequiredProficiency));
 
                 foreach (var operatingShift in table.OperatingShifts)
                 {
@@ -122,31 +155,36 @@ public class ScheduleService : IScheduleService
                     {
                         var exclude = masterAssignments
                             .Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
-                                && a.Table.Name == operatingShift.Table.Name)
-                            .Select(p => p.Dealer.Id)
+                                        && a.Table.Name == operatingShift.Table.Name)
+                            .Select(p => p.Dealer?.Id)
                             .Distinct()
                             .ToArray();
                         qualifiedDealers = qualifiedDealers.Where(a => !exclude.Contains(a.Id)).ToList();
                     }
-                    //given an operating hour (9-6)
-                    //open hour should be within/equals to qualified dealer's shift
-                    var shiftMatchedDealers = qualifiedDealers
+
+					//given an operating hour (9-6)
+					//open hour should be within/equals to qualified dealer's shift
+					//added 15 minutes buffer for dealer shifts to be qualified to man a table game
+					var shiftMatchedDealers = qualifiedDealers
                         .Where(q => q.ShiftStart == operatingShift.Open
-                            && q.ShiftEnd == operatingShift.Close)
+                                    && q.ShiftEnd == operatingShift.Close)
                         .Select(s => s)
                         .ToList();
 
-                    if (shiftMatchedDealers.Count != 0)
+					assignment.Cluster = table.Cluster;
+					assignment.Table = operatingShift.Table;
+					assignment.Hours = operatingShift;
+
+					if (shiftMatchedDealers.Count != 0)
                     {
-                        var selectedDealer = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
-                        assignment.Cluster = table.Cluster;
+                        var selectedDealer =
+                            shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
                         assignment.DealerId = selectedDealer.Id;
                         assignment.Dealer = selectedDealer;
-                        assignment.Table = operatingShift.Table;
-                        assignment.Hours = operatingShift;
-                        masterAssignments.Add(assignment);
                     }
-                }
+
+                    masterAssignments.Add(assignment);
+				}
             }
 
             // if unable to assign, ask user to adjust required skills ??
@@ -156,90 +194,11 @@ public class ScheduleService : IScheduleService
 
         return masterAssignments;
     }
-    
-    
-    #region "Obsolete"
-    [Obsolete]
-    public List<Assignments> GenerateSchedule_Kath()
+
+    public void GeneratePitSupervisorSchedule()
     {
-        List<Table> tables = _tableService.GetAll();
-        List<Employee> employees = _employeeService.GetAllDealers();
 
-        var startDate = new DateTime(2024, 01, 01);
-        var endDate = new DateTime(2024, 01, 14);
-        var totalDays = (endDate - startDate).TotalDays;
-
-        //TODO: Normalize TableAssignments further. (AssignmentHeader and AssignmentDetails)
-        List<Assignments> masterAssignments = new();
-        foreach (var table in tables)
-        {
-            //Filter employees that are qualified to deal
-            var qualifiedDealers = employees
-                .Where(e => e.Skills.Any(c => c.Game == table.Game
-                    && c.Proficiency >= table.RequiredProficiency));
-
-            // if no dealers meet current qualification
-            // ask them to adjust table required proficiency
-
-            List<Assignments> prevAssignment;
-            for (int day = 0; day <= totalDays; day++)
-            {
-                // if no qualified dealers are available
-                // WHY THEY ALL ON LEAVE THOUGH?!
-
-                foreach (var operatingShift in table.OperatingShifts)
-                {
-                    Assignments assignment = new();
-
-                    assignment.ScheduleDate = startDate.AddDays(day);
-
-                    var availableEmployees = qualifiedDealers
-                        .Where(e => e.Leaves == null
-                            || !e.Leaves.Any(l => l.Date.Date == assignment.ScheduleDate.Date))
-                        .ToList();
-
-                    //given an operating hour (9-6)
-                    //open hour should be within/equals to qualified dealer's shift
-                    var shiftMatchedDealers = availableEmployees
-                        .Where(q => q.ShiftStart == operatingShift.Open
-                            && q.ShiftEnd == operatingShift.Close)
-                        .Select(s => s)
-                        .ToList();
-
-                    if (masterAssignments.Count == 0)
-                    {
-                        prevAssignment = _tableAssignmentService.Get(startDate.AddDays(day - 1)).ToList();
-                    }
-                    else
-                    {
-                        prevAssignment = masterAssignments
-                            .Where(a => a.ScheduleDate == startDate.AddDays(day - 1)
-                                && a.Hours.ShiftClass == operatingShift.ShiftClass)
-                            .ToList();
-                    }
-
-                    var prevAssignmentShift = prevAssignment.FirstOrDefault(p => p.Hours == operatingShift);
-                    shiftMatchedDealers = shiftMatchedDealers.Where(e => e.Id != prevAssignmentShift?.Dealer.Id).ToList();
-
-                    if (shiftMatchedDealers.Count != 0)
-                    {
-                        var theChosenOne = shiftMatchedDealers[ThreadSafeRandomizer.ThreadRandom.Next(0, shiftMatchedDealers.Count)];
-                        assignment.Dealer = theChosenOne;
-                        assignment.Table = operatingShift.Table;
-                        assignment.Hours = operatingShift;
-                        masterAssignments.Add(assignment);
-                    }
-                }
-            }
-
-            // if unable to assign, ask user to adjust required skills ??
-            // who assigns substitute on days where an employee is on VL 
-            // SL == manual assignment?
-        }
-
-        return masterAssignments;
     }
-    #endregion
 }
 
 public static class ThreadSafeRandomizer

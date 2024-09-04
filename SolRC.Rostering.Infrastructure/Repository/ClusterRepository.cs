@@ -20,6 +20,8 @@ public class ClusterRepository : IClusterRepository
                 .ThenInclude(p => p.GamingFloor)
             .Include(p => p.TableGames)
                 .ThenInclude(p => p.Game)
-            .ToList();
+            .Include(p => p.TableGames)
+				.ThenInclude(p => p.OperatingShifts)
+			.ToList();
     }
 }

@@ -13,15 +13,15 @@ public record Assignments
     
     public Table Table { get; set; }
 
-    public Guid DealerId { get; set; }
+    public Guid? DealerId { get; set; }
     
-    public Employee Dealer { get; set; }
+    public Employee? Dealer { get; set; }
     
     public Cluster Cluster { get; set; }
     
-    public Guid RelieverId { get; set; }
+    public Guid? RelieverId { get; set; }
     
-    public Employee Reliever { get; set; }
+    public Employee? Reliever { get; set; }
     
     public bool IsPublished { get; set; }
     

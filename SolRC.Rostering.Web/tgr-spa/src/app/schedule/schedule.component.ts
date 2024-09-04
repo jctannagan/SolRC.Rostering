@@ -31,7 +31,9 @@ export class ScheduleComponent {
   private downloadFile(data: any, type: string) {
     let blob = new Blob([data], { type: type});
     let anchor = document.createElement("a");
-    anchor.download = "ScheduledRoster.xlsx";
+    const date = new Date();
+    const month = ("0" + (date.getMonth() + 1)).slice(-2);
+    anchor.download = `Rostering-${month}${date.getFullYear()}.xlsx`;
     anchor.href = window.URL.createObjectURL(blob);
     anchor.click();
     // let pwa = window.open(url);

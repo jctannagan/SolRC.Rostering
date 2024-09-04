@@ -67,7 +67,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Assignments");
+                    b.ToTable("Assignments", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
@@ -87,7 +87,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("PitId");
 
-                    b.ToTable("Clusters");
+                    b.ToTable("Clusters", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Employee", b =>
@@ -136,7 +136,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.GamingFloor", b =>
@@ -159,7 +159,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GamingFloor");
+                    b.ToTable("GamingFloor", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leave", b =>
@@ -183,7 +183,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("EmployeeNumber");
 
-                    b.ToTable("Leaves");
+                    b.ToTable("Leaves", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Lookup", b =>
@@ -208,7 +208,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lookups");
+                    b.ToTable("Lookups", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
@@ -228,7 +228,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GamingFloorId");
 
-                    b.ToTable("Pits");
+                    b.ToTable("Pits", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
@@ -255,7 +255,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Skills");
+                    b.ToTable("Skills", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Table", b =>
@@ -291,7 +291,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Tables");
+                    b.ToTable("Tables", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Time", b =>
@@ -321,7 +321,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Times");
+                    b.ToTable("Times", (string)null);
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Assignments", b =>
