@@ -9,6 +9,6 @@ export class ScheduleApiService {
     constructor(private http: HttpClient) {}
 
     generateSchedule(): Observable<any> {
-        return this.http.get('/api/schedule/download', {responseType: 'blob'});
+        return this.http.get('/api/schedule/generate', {responseType: 'blob'});
     }
 }

@@ -13,12 +13,12 @@ namespace SolRC.Rostering.Domain.Services
             _tableAssignmentRepository = tableAssignmentRepository;
         }
 
-        public IList<TableAssignment> Get(DateTime dateTime)
+        public IList<Assignments> Get(DateTime dateTime)
         {
             return _tableAssignmentRepository.Get(dateTime);
         }
 
-        public IList<TableAssignment> GetAll()
+        public IList<Assignments> GetAll()
         {
             return _tableAssignmentRepository.GetAll();
         }

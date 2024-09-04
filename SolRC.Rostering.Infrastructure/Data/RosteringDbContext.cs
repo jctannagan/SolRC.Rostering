@@ -8,7 +8,7 @@ public class RosteringDbContext : DbContext
 {
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Table> Tables { get; set; }
-    public DbSet<TableAssignment> TableAssignments { get; set; }
+    public DbSet<Assignments> Assignments { get; set; }
     public DbSet<Time> Times { get; set; }
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Leave> Leaves { get; set; }

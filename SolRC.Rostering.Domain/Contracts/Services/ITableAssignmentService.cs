@@ -4,8 +4,8 @@ namespace SolRC.Rostering.Domain.Contracts.Services;
 
 public interface ITableAssignmentService
 {
-    IList<TableAssignment> GetAll();
+    IList<Assignments> GetAll();
 
-    IList<TableAssignment> Get(DateTime dateTime);
+    IList<Assignments> Get(DateTime dateTime);
 
 }

@@ -4,24 +4,24 @@ using SolRC.Rostering.Infrastructure.Data;
 
 namespace SolRC.Rostering.Infrastructure.Repository
 {
-    public class TableAssignmentRepository : ITableAssignmentRepository
+    public class AssignmentRepository : ITableAssignmentRepository
     {
         private readonly RosteringDbContext _dbContext;
 
-        public TableAssignmentRepository(RosteringDbContext dbContext)
+        public AssignmentRepository(RosteringDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public IList<TableAssignment> Get(DateTime dateTime)
+        public IList<Assignments> Get(DateTime dateTime)
         {
-            return _dbContext.TableAssignments
+            return _dbContext.Assignments
                 .Where(t => t.ScheduleDate == dateTime).ToList();
         }
 
-        public IList<TableAssignment> GetAll()
+        public IList<Assignments> GetAll()
         {
-            return _dbContext.TableAssignments.ToList();
+            return _dbContext.Assignments.ToList();
         }
     }
 }

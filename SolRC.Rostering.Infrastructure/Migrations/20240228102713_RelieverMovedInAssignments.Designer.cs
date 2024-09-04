@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SolRC.Rostering.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SolRC.Rostering.Infrastructure.Data;
 namespace SolRC.Rostering.Infrastructure.Migrations
 {
     [DbContext(typeof(RosteringDbContext))]
-    partial class RosteringDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240228102713_RelieverMovedInAssignments")]
+    partial class RelieverMovedInAssignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,7 +70,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Assignments", (string)null);
+                    b.ToTable("Assignments");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Cluster", b =>
@@ -87,7 +90,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("PitId");
 
-                    b.ToTable("Clusters", (string)null);
+                    b.ToTable("Clusters");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Employee", b =>
@@ -136,7 +139,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.GamingFloor", b =>
@@ -159,7 +162,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GamingFloor", (string)null);
+                    b.ToTable("GamingFloor");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Leave", b =>
@@ -183,7 +186,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("EmployeeNumber");
 
-                    b.ToTable("Leaves", (string)null);
+                    b.ToTable("Leaves");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Lookup", b =>
@@ -208,7 +211,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lookups", (string)null);
+                    b.ToTable("Lookups");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Pit", b =>
@@ -228,7 +231,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GamingFloorId");
 
-                    b.ToTable("Pits", (string)null);
+                    b.ToTable("Pits");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Skill", b =>
@@ -255,7 +258,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Skills", (string)null);
+                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Table", b =>
@@ -291,7 +294,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Tables", (string)null);
+                    b.ToTable("Tables");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Time", b =>
@@ -321,7 +324,7 @@ namespace SolRC.Rostering.Infrastructure.Migrations
 
                     b.HasIndex("TableId");
 
-                    b.ToTable("Times", (string)null);
+                    b.ToTable("Times");
                 });
 
             modelBuilder.Entity("SolRC.Rostering.Domain.Models.Assignments", b =>

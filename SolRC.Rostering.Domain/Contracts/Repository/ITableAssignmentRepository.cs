@@ -9,8 +9,8 @@ namespace SolRC.Rostering.Domain.Contracts.Repository
 {
     public interface ITableAssignmentRepository
     {
-        IList<TableAssignment> GetAll();
+        IList<Assignments> GetAll();
 
-        IList<TableAssignment> Get(DateTime dateTime);
+        IList<Assignments> Get(DateTime dateTime);
     }
 }
